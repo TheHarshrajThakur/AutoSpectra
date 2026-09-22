@@ -1,17 +1,20 @@
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Home, Zap, Box, GraduationCap, Users, Menu, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import LanguageSelector from './LanguageSelector'
 
 const navLinks = [
-  { name: 'Home', id: 'home', icon: Home },
-  { name: 'Showcase', id: 'showcase', icon: Zap },
-  { name: 'Inventory', id: 'inventory', icon: Box },
-  { name: 'Academy', id: 'academy', icon: GraduationCap },
-  { name: 'About', id: 'about', icon: Users },
+  { id: 'home', key: 'home', icon: Home },
+  { id: 'showcase', key: 'showcase', icon: Zap },
+  { id: 'inventory', key: 'inventory', icon: Box },
+  { id: 'academy', key: 'academy', icon: GraduationCap },
+  { id: 'about', key: 'about', icon: Users },
 ]
 
 export default function Navbar() {
+  const { t } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
@@ -35,7 +38,7 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    if (location.pathname === '/academy') {
+    if (location.pathname === '/academy' || location.pathname === '/assessment') {
       setActiveSection('academy')
     } else if (location.pathname === '/') {
     } else {
@@ -43,8 +46,7 @@ export default function Navbar() {
     }
   }, [location])
 
-  const handleNav = (link) => {
-    const id = link.toLowerCase()
+  const handleNav = (id) => {
     setMobileOpen(false)
     if (id === 'home') {
       if (location.pathname === '/') {
@@ -83,23 +85,25 @@ export default function Navbar() {
       >
         <motion.div 
           animate={{
-            background: scrolled ? 'rgba(10, 10, 10, 0.95)' : 'rgba(10, 10, 10, 0.6)',
-            borderColor: scrolled ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.08)',
-            boxShadow: scrolled ? '0 30px 60px rgba(0,0,0,0.5)' : '0 10px 30px rgba(0,0,0,0.2)',
+            background: scrolled ? 'rgba(5, 5, 5, 0.98)' : 'rgba(10, 10, 10, 0.6)',
+            borderColor: scrolled ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)',
+            boxShadow: scrolled ? '0 20px 40px rgba(0,0,0,0.7), 0 0 20px rgba(59,130,246,0.05)' : '0 10px 30px rgba(0,0,0,0.2)',
+            backdropFilter: scrolled ? 'blur(28px)' : 'blur(20px)',
+            WebkitBackdropFilter: scrolled ? 'blur(28px)' : 'blur(20px)'
           }}
           transition={{ duration: 0.4 }}
           style={{
-            width: '100%', maxWidth: '1200px',
+            width: '100%', maxWidth: '1240px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0.75rem 1.75rem', backdropFilter: 'blur(20px)',
+            padding: '0.75rem 1.75rem',
             border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '100px',
-            pointerEvents: 'auto', gap: '1.5rem'
+            pointerEvents: 'auto', gap: '1rem'
           }}
           className="nav-container"
         >
           {/* Logo Section */}
           <div 
-            onClick={() => handleNav('Home')}
+            onClick={() => handleNav('home')}
             style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', height: '2.8rem' }}
           >
             <div style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.04em', textTransform: 'uppercase', fontFamily: "'Outfit', sans-serif" }} className="nav-logo-text">
@@ -108,22 +112,23 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} className="nav-links">
+          <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }} className="nav-links">
             {navLinks.map((link) => {
               const isActive = activeSection === link.id
+              const label = t(`nav.${link.key}`)
               return (
                 <motion.button 
                   key={link.id} 
-                  onClick={() => handleNav(link.name)}
+                  onClick={() => handleNav(link.id)}
                   whileHover={{ color: '#fff' }}
                   whileTap={{ scale: 0.98 }}
                   style={{
-                    position: 'relative', padding: '0.8rem 1.6rem', fontSize: '0.85rem', fontWeight: 700, 
+                    position: 'relative', padding: '0.75rem 1.35rem', fontSize: '0.85rem', fontWeight: 700, 
                     color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer',
                     transition: 'color 0.3s ease', zIndex: 1
                   }}
                 >
-                  {link.name}
+                  {label}
                   {isActive && (
                     <motion.div
                       layoutId="active-nav"
@@ -139,19 +144,22 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {/* Actions: Language Selector + Join Button */}
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <LanguageSelector />
+
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               style={{ 
-                padding: '0.75rem 1.75rem', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 800, 
+                padding: '0.65rem 1.5rem', borderRadius: '100px', fontSize: '0.82rem', fontWeight: 800, 
                 background: '#fff', color: '#000', border: 'none', cursor: 'pointer'
               }}
               className="nav-join-btn"
             >
-              JOIN
+              {t('nav.join')}
             </motion.button>
+
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -188,18 +196,25 @@ export default function Navbar() {
             transition={{ type: 'spring', damping: 20, stiffness: 200 }}
             style={{
               position: 'fixed', top: '5.5rem', left: '1.5rem', right: '1.5rem', zIndex: 99,
-              background: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(24px)',
+              background: 'rgba(15,15,15,0.96)', backdropFilter: 'blur(24px)',
               borderRadius: '2rem', border: '1px solid rgba(255,255,255,0.1)',
               padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
-              boxShadow: '0 30px 60px rgba(0,0,0,0.6)', transformOrigin: 'top'
+              boxShadow: '0 30px 60px rgba(0,0,0,0.8)', transformOrigin: 'top'
             }}
           >
+            {/* Language Selector in Mobile Drawer */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.5rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Language</span>
+              <LanguageSelector isMobile={true} />
+            </div>
+
             {navLinks.map((link, i) => {
               const isActive = activeSection === link.id
+              const label = t(`nav.${link.key}`)
               return (
                 <motion.button 
                   key={link.id} 
-                  onClick={() => handleNav(link.name)}
+                  onClick={() => handleNav(link.id)}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
@@ -207,11 +222,11 @@ export default function Navbar() {
                     color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', 
                     background: isActive ? 'rgba(255,255,255,0.05)' : 'none', 
                     border: 'none', borderRadius: '1.25rem', textAlign: 'left',
-                    fontSize: '0.95rem', fontWeight: 600, padding: '1rem 1.5rem', 
+                    fontSize: '0.95rem', fontWeight: 600, padding: '0.9rem 1.25rem', 
                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem',
                   }}>
                   <link.icon size={18} style={{ opacity: isActive ? 1 : 0.5 }} />
-                  {link.name}
+                  {label}
                 </motion.button>
               )
             })}
@@ -220,14 +235,14 @@ export default function Navbar() {
       </AnimatePresence>
 
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 860px) {
           .nav-links { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
           .nav-container { padding: 0.5rem 1rem !important; gap: 0.5rem !important; }
           .nav-logo-text { font-size: 1.2rem !important; }
-          .nav-join-btn { padding: 0.6rem 1.2rem !important; font-size: 0.75rem !important; }
+          .nav-join-btn { padding: 0.55rem 1rem !important; font-size: 0.75rem !important; }
         }
-        @media (max-width: 380px) {
+        @media (max-width: 420px) {
           .nav-logo-text { font-size: 1.05rem !important; }
           .nav-join-btn { display: none !important; }
         }

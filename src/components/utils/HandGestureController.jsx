@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { useStore } from '../../store/useStore';
+import { useTranslation } from 'react-i18next';
 
 /**
  * HandGestureController Component
@@ -10,6 +11,7 @@ import { useStore } from '../../store/useStore';
  * Data is pushed to the global Zustand store to be consumed by HandControls.
  */
 export default function HandGestureController() {
+  const { t } = useTranslation();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const setHandPosition = useStore((state) => state.setHandPosition);
@@ -133,7 +135,7 @@ export default function HandGestureController() {
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', transform: 'scaleX(-1)' }}
       />
       <div style={{ position: 'absolute', top: '5px', left: '5px', background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>
-        HAND TRACKING
+        {t ? t('viewer.hand_tracking_overlay') : 'HAND TRACKING'}
       </div>
     </div>
   );

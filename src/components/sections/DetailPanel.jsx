@@ -6,11 +6,12 @@ import { OrbitControls, Stage } from '@react-three/drei'
 import { useParams, useNavigate } from 'react-router-dom'
 import { CrankshaftModel, PistonModel, SparkPlugModel, InternalsModel, EngineBlockModel } from '../3d/Models'
 import ErrorBoundary from '../utils/ErrorBoundary'
-import { COMPONENTS } from './ComponentGallery'
+import { getLocalizedComponents } from './ComponentGallery'
 import HandControls from '../utils/HandControls'
 import HandGestureController from '../utils/HandGestureController'
 import { useStore } from '../../store/useStore'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 function DetailModel({ id, type, color }) {
   const controlsRef = useRef(null)
@@ -41,6 +42,7 @@ function DetailModel({ id, type, color }) {
 }
 
 export default function DetailPanel() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
 
@@ -48,7 +50,8 @@ export default function DetailPanel() {
   const handControlTarget = useStore(state => state.handControlTarget)
   const setHandTracking = useStore(state => state.setHandTracking)
 
-  const activeModel = COMPONENTS.find(c => c.id === parseInt(id))
+  const localizedComponents = getLocalizedComponents(t)
+  const activeModel = localizedComponents.find(c => c.id === parseInt(id))
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -56,16 +59,28 @@ export default function DetailPanel() {
 
   if (!activeModel) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505' }}>
         <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: '2rem', color: '#111827', marginBottom: '1rem' }}>Component Not Found</h2>
-          <button onClick={() => navigate('/')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>
-            Return Home
+          <h2 style={{ fontSize: '2rem', color: '#fff', marginBottom: '1rem' }}>{t('detail.not_found')}</h2>
+          <button onClick={() => navigate('/')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 700 }}>
+            {t('detail.return_home')}
           </button>
         </div>
       </div>
     )
   }
+
+  const getSpecLabel = (label) => {
+    switch (label) {
+      case 'Reference ID': return t('detail.spec_ref_id', { defaultValue: 'Reference ID' });
+      case 'Net Weight': return t('detail.spec_net_weight', { defaultValue: 'Net Weight' });
+      case 'Core Material': return t('detail.spec_core_material', { defaultValue: 'Core Material' });
+      case 'Hardness': return t('detail.spec_hardness', { defaultValue: 'Hardness' });
+      case 'Thermal Range': return t('detail.spec_thermal_range', { defaultValue: 'Thermal Range' });
+      case 'Certification': return t('detail.spec_certification', { defaultValue: 'Certification' });
+      default: return label;
+    }
+  };
 
   const handleDownload = () => {
     const specsText = (activeModel.specs || [
@@ -75,7 +90,7 @@ export default function DetailPanel() {
       { label: 'Hardness', value: '45 HRC' },
       { label: 'Thermal Range', value: '-60°C to 450°C' },
       { label: 'Certification', value: 'ISO-9001 Pro' }
-    ]).map(s => `${s.label}: ${s.value}`).join('\n');
+    ]).map(s => `${getSpecLabel(s.label)}: ${s.value}`).join('\n');
 
     const featuresText = (activeModel.features || [
       'Industrial grade material',
@@ -88,7 +103,7 @@ export default function DetailPanel() {
 AUTO SPECTRA TECHNICAL DATA SHEET
 =========================================
 Component: ${activeModel.name}
-Category: ${activeModel.type.toUpperCase()}
+Category: ${(activeModel.typeName || activeModel.type).toUpperCase()}
 Status: VALIDATED (A1 GRADE)
 
 -----------------------------------------
@@ -139,7 +154,7 @@ Timestamp: ${new Date().toLocaleString()}
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        alert(t('detail.link_copied'));
       }
     } catch (err) {
       if (err.name !== 'AbortError') {
@@ -166,7 +181,7 @@ Timestamp: ${new Date().toLocaleString()}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
           >
-            <ArrowLeft size={16} /> Back to Catalog
+            <ArrowLeft size={16} /> {t('detail.back_btn')}
           </button>
         </div>
 
@@ -206,7 +221,7 @@ Timestamp: ${new Date().toLocaleString()}
                     cursor: 'pointer', color: (isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? '#fff' : '#374151',
                     boxShadow: '0 4px 10px rgba(0,0,0,0.1)', transition: 'all 0.2s'
                   }}
-                  title={(isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? "Disable Hand Control" : "Enable Hand Control"}
+                  title={(isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? t('viewer.tooltip_hand_disable') : t('viewer.tooltip_hand_enable')}
                 >
                   <Hand size={18} />
                 </button>
@@ -226,7 +241,7 @@ Timestamp: ${new Date().toLocaleString()}
                     cursor: 'pointer', color: '#374151',
                     boxShadow: '0 4px 10px rgba(0,0,0,0.1)', transition: 'all 0.2s'
                   }}
-                  title="Fullscreen"
+                  title={t('viewer.tooltip_fullscreen')}
                 >
                   <Maximize2 size={18} />
                 </button>
@@ -243,7 +258,7 @@ Timestamp: ${new Date().toLocaleString()}
                 <>
                   <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', zIndex: 10, display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.9)', padding: '8px 12px', borderRadius: '20px', border: '1px solid #e5e7eb', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', pointerEvents: 'none' }}>
                     <Hand size={16} color="#10b981" />
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>Hand Control Active</span>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>{t('viewer.hand_control_active')}</span>
                   </div>
                   <HandGestureController />
                 </>
@@ -270,7 +285,7 @@ Timestamp: ${new Date().toLocaleString()}
                   }}
                 >
                   <Download size={20} />
-                  Download CAD Schematic
+                  {t('detail.download_cad')}
                 </motion.button>
                 <motion.button 
                   onClick={handleShare}
@@ -282,7 +297,7 @@ Timestamp: ${new Date().toLocaleString()}
                     cursor: 'pointer', fontSize: '0.95rem'
                   }}
                 >
-                  Share Data
+                  {t('detail.share_data')}
                 </motion.button>
               </div>
 
@@ -295,9 +310,9 @@ Timestamp: ${new Date().toLocaleString()}
                   <ShieldCheck size={24} color="#3b82f6" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '1rem', color: '#ffffff', marginBottom: '0.25rem', letterSpacing: '-0.01em' }}>A1 Engineering Grade</div>
+                  <div style={{ fontWeight: 800, fontSize: '1rem', color: '#ffffff', marginBottom: '0.25rem', letterSpacing: '-0.01em' }}>{t('detail.grade_badge')}</div>
                   <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
-                    Validated for high-stress aerospace and automotive applications.
+                    {t('detail.grade_desc')}
                   </p>
                 </div>
               </div>
@@ -321,7 +336,7 @@ Timestamp: ${new Date().toLocaleString()}
                 marginBottom: '1.5rem'
               }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3b82f6' }} />
-                {activeModel.type}
+                {activeModel.typeName || activeModel.type}
               </div>
 
               <h1 style={{
@@ -333,7 +348,7 @@ Timestamp: ${new Date().toLocaleString()}
               </h1>
 
               <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                Serial: MC-2026-X0{activeModel.id}
+                {t('detail.serial')}: MC-2026-X0{activeModel.id}
               </div>
             </div>
 
@@ -351,7 +366,7 @@ Timestamp: ${new Date().toLocaleString()}
             {activeModel.features && (
               <div style={{ background: 'rgba(59,130,246,0.05)', borderRadius: '1.25rem', padding: '2rem', border: '1px solid rgba(59,130,246,0.1)' }}>
                 <h3 className="mobile-center-text" style={{ fontSize: '1.1rem', fontWeight: 700, color: '#60a5fa', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <ShieldCheck size={20} /> Engineering Highlights
+                  <ShieldCheck size={20} /> {t('detail.highlights')}
                 </h3>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {activeModel.features.map((feature, idx) => (
@@ -371,7 +386,7 @@ Timestamp: ${new Date().toLocaleString()}
             }}>
               <div style={{ padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Cpu size={18} color="#3b82f6" />
-                <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ffffff', letterSpacing: '-0.01em' }}>Technical Specifications</span>
+                <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ffffff', letterSpacing: '-0.01em' }}>{t('detail.tech_specs')}</span>
               </div>
               <div className="detail-specs-grid">
                 {(activeModel.specs || [
@@ -383,7 +398,7 @@ Timestamp: ${new Date().toLocaleString()}
                   { label: 'Certification', value: 'ISO-9001 Pro' },
                 ]).map((spec, i) => (
                   <div key={spec.label} className="detail-spec-item">
-                    <div style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: '0.4rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{spec.label}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: '0.4rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{getSpecLabel(spec.label)}</div>
                     <div style={{ color: '#ffffff', fontWeight: 800 }}>{spec.value}</div>
                   </div>
                 ))}

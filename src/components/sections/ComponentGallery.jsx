@@ -7,6 +7,7 @@ import { CrankshaftModel, PistonModel, SparkPlugModel, InternalsModel, EngineBlo
 import { ArrowUpRight, Maximize2, Hand } from 'lucide-react'
 import ErrorBoundary from '../utils/ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import HandControls from '../utils/HandControls'
 import HandGestureController from '../utils/HandGestureController'
 
@@ -121,7 +122,53 @@ export const COMPONENTS = [
   }
 ]
 
-function ModelCard({ comp, onClick, index }) {
+export const getLocalizedComponents = (t) => {
+  if (!t) return COMPONENTS;
+  return [
+    {
+      ...COMPONENTS[0],
+      name: t('components.crankshaft.name', { defaultValue: COMPONENTS[0].name }),
+      typeName: t('components.crankshaft.type', { defaultValue: COMPONENTS[0].type }),
+      spec: t('components.crankshaft.spec', { defaultValue: COMPONENTS[0].spec }),
+      description: t('components.crankshaft.desc', { defaultValue: COMPONENTS[0].description }),
+      extendedDescription: t('components.crankshaft.extendedDesc', { defaultValue: COMPONENTS[0].extendedDescription }),
+    },
+    {
+      ...COMPONENTS[1],
+      name: t('components.piston.name', { defaultValue: COMPONENTS[1].name }),
+      typeName: t('components.piston.type', { defaultValue: COMPONENTS[1].type }),
+      spec: t('components.piston.spec', { defaultValue: COMPONENTS[1].spec }),
+      description: t('components.piston.desc', { defaultValue: COMPONENTS[1].description }),
+      extendedDescription: t('components.piston.extendedDesc', { defaultValue: COMPONENTS[1].extendedDescription }),
+    },
+    {
+      ...COMPONENTS[2],
+      name: t('components.spark_plug.name', { defaultValue: COMPONENTS[2].name }),
+      typeName: t('components.spark_plug.type', { defaultValue: COMPONENTS[2].type }),
+      spec: t('components.spark_plug.spec', { defaultValue: COMPONENTS[2].spec }),
+      description: t('components.spark_plug.desc', { defaultValue: COMPONENTS[2].description }),
+      extendedDescription: t('components.spark_plug.extendedDesc', { defaultValue: COMPONENTS[2].extendedDescription }),
+    },
+    {
+      ...COMPONENTS[3],
+      name: t('components.internals.name', { defaultValue: COMPONENTS[3].name }),
+      typeName: t('components.internals.type', { defaultValue: COMPONENTS[3].type }),
+      spec: t('components.internals.spec', { defaultValue: COMPONENTS[3].spec }),
+      description: t('components.internals.desc', { defaultValue: COMPONENTS[3].description }),
+      extendedDescription: t('components.internals.extendedDesc', { defaultValue: COMPONENTS[3].extendedDescription }),
+    },
+    {
+      ...COMPONENTS[4],
+      name: t('components.engine_block.name', { defaultValue: COMPONENTS[4].name }),
+      typeName: t('components.engine_block.type', { defaultValue: COMPONENTS[4].type }),
+      spec: t('components.engine_block.spec', { defaultValue: COMPONENTS[4].spec }),
+      description: t('components.engine_block.desc', { defaultValue: COMPONENTS[4].description }),
+      extendedDescription: t('components.engine_block.extendedDesc', { defaultValue: COMPONENTS[4].extendedDescription }),
+    },
+  ];
+};
+
+function ModelCard({ comp, onClick, index, t }) {
   const [isHovered, setIsHovered] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
   const ref = useRef(null)
@@ -222,7 +269,7 @@ function ModelCard({ comp, onClick, index }) {
           boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
         }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: comp.color }} />
-          <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{comp.type}</span>
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{comp.typeName || comp.type}</span>
         </div>
 
         {/* Fullscreen button */}
@@ -238,7 +285,7 @@ function ModelCard({ comp, onClick, index }) {
             boxShadow: '0 4px 10px rgba(0,0,0,0.2)', color: 'rgba(255,255,255,0.8)',
             transition: 'all 0.2s'
           }}
-          title="Fullscreen"
+          title={t ? t('viewer.tooltip_fullscreen') : 'Fullscreen'}
         >
           <Maximize2 size={14} />
         </button>
@@ -261,7 +308,7 @@ function ModelCard({ comp, onClick, index }) {
             transition: 'all 0.2s',
             zIndex: 10
           }}
-          title={(isHandTracking && useStore.getState().handControlTarget === `comp-${comp.id}`) ? "Disable Hand Control" : "Enable Hand Control"}
+          title={(isHandTracking && useStore.getState().handControlTarget === `comp-${comp.id}`) ? (t ? t('viewer.tooltip_hand_disable') : "Disable Hand Control") : (t ? t('viewer.tooltip_hand_enable') : "Enable Hand Control")}
         >
           <Hand size={14} />
         </button>
@@ -299,7 +346,7 @@ function ModelCard({ comp, onClick, index }) {
           display: 'flex', justifyContent: 'space-between',
           paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.08)'
         }}>
-          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Grade A1</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t ? t('gallery.grade_a1') : 'Grade A1'}</span>
           <span style={{ fontSize: '0.7rem', fontWeight: 700, color: comp.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{comp.spec}</span>
         </div>
       </div>
@@ -313,14 +360,22 @@ function ModelCard({ comp, onClick, index }) {
  * Each component is displayed in a ModelCard with 3D preview and gesture controls.
  */
 export default function ComponentGallery() {
+  const { t } = useTranslation()
   const setActiveModel = useStore(state => state.setActiveModel)
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
 
-  const categories = ['All', 'Engine', 'Ignition', 'Drivetrain']
+  const categories = [
+    { id: 'All', label: t('gallery.cat_all') },
+    { id: 'Engine', label: t('gallery.cat_engine') },
+    { id: 'Ignition', label: t('gallery.cat_ignition') },
+    { id: 'Drivetrain', label: t('gallery.cat_drivetrain') }
+  ]
 
-  const filteredComponents = COMPONENTS.filter(comp => {
+  const localizedComponents = getLocalizedComponents(t)
+
+  const filteredComponents = localizedComponents.filter(comp => {
     const matchesSearch = comp.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           comp.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = activeCategory === 'All' || 
@@ -343,7 +398,7 @@ export default function ComponentGallery() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '2rem' }}>
             <div>
               <div className="section-label">
-                <span>Technical Archive</span>
+                <span>{t('gallery.badge')}</span>
               </div>
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -356,7 +411,7 @@ export default function ComponentGallery() {
                   letterSpacing: '-0.02em'
                 }}
               >
-                Component <span style={{ color: '#3b82f6' }}>Library</span>
+                {t('gallery.title_part1')} <span style={{ color: '#3b82f6' }}>{t('gallery.title_part2')}</span>
               </motion.h2>
             </div>
             
@@ -365,7 +420,7 @@ export default function ComponentGallery() {
               <div style={{ position: 'relative' }}>
                 <input 
                   type="text" 
-                  placeholder="Search components..." 
+                  placeholder={t('gallery.search_placeholder')} 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{
@@ -387,20 +442,20 @@ export default function ComponentGallery() {
           <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '1rem' }}>
             {categories.map(cat => (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
                 style={{
                   padding: '0.6rem 1.5rem', borderRadius: '2rem',
-                  background: activeCategory === cat ? '#3b82f6' : 'rgba(255,255,255,0.05)',
-                  color: activeCategory === cat ? '#fff' : 'rgba(255,255,255,0.6)',
+                  background: activeCategory === cat.id ? '#3b82f6' : 'rgba(255,255,255,0.05)',
+                  color: activeCategory === cat.id ? '#fff' : 'rgba(255,255,255,0.6)',
                   border: '1px solid',
-                  borderColor: activeCategory === cat ? '#3b82f6' : 'rgba(255,255,255,0.1)',
+                  borderColor: activeCategory === cat.id ? '#3b82f6' : 'rgba(255,255,255,0.1)',
                   fontSize: '0.85rem', fontWeight: 700,
                   cursor: 'pointer', transition: 'all 0.3s',
-                  boxShadow: activeCategory === cat ? '0 10px 20px -5px rgba(59,130,246,0.4)' : 'none'
+                  boxShadow: activeCategory === cat.id ? '0 10px 20px -5px rgba(59,130,246,0.4)' : 'none'
                 }}
               >
-                {cat}
+                {cat.label}
               </button>
             ))}
           </div>
@@ -420,7 +475,7 @@ export default function ComponentGallery() {
             >
               {filteredComponents.map((comp, i) => (
                 <div key={comp.id} style={{ width: 'min(100%, 360px)' }}>
-                  <ModelCard comp={comp} index={i} onClick={() => handleCardClick(comp)} />
+                  <ModelCard comp={comp} index={i} onClick={() => handleCardClick(comp)} t={t} />
                 </div>
               ))}
             </motion.div>
@@ -430,8 +485,8 @@ export default function ComponentGallery() {
               animate={{ opacity: 1 }}
               style={{ textAlign: 'center', padding: '5rem 0', color: '#9ca3af' }}
             >
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>No components found</h3>
-              <p>Try adjusting your search or category filters.</p>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{t('gallery.no_components')}</h3>
+              <p>{t('gallery.no_components_sub')}</p>
             </motion.div>
           )}
         </div>

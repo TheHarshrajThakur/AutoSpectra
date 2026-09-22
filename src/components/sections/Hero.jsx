@@ -4,6 +4,7 @@ import { Canvas } from '@react-three/fiber'
 import { Environment, Float, View, PerspectiveCamera } from '@react-three/drei'
 import { GearModel } from '../3d/Models'
 import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const container = {
   hidden: { opacity: 0 },
@@ -47,6 +48,8 @@ function GearboxSystem() {
 }
 
 export default function Hero() {
+  const { t } = useTranslation()
+
   return (
     <section
       id="home"
@@ -83,7 +86,7 @@ export default function Hero() {
         >
           {/* Badge */}
           <motion.div variants={item} className="section-label mobile-center" style={{ justifyContent: 'flex-start' }}>
-            <span>Engineering The Future</span>
+            <span>{t('hero.badge')}</span>
           </motion.div>
 
           {/* Headline */}
@@ -93,8 +96,8 @@ export default function Hero() {
             letterSpacing: '-0.02em',
             marginBottom: '1.5rem', fontFamily: "'Outfit', sans-serif"
           }}>
-            <span className="text-icy" style={{ display: 'block' }}>Auto</span>
-            <span className="text-icy" style={{ display: 'block' }}>Spectra</span>
+            <span className="text-icy" style={{ display: 'block' }}>{t('hero.title_part1')}</span>
+            <span className="text-icy" style={{ display: 'block' }}>{t('hero.title_part2')}</span>
           </motion.h1>
 
           {/* Subtext */}
@@ -104,7 +107,7 @@ export default function Hero() {
             fontWeight: 400, lineHeight: 1.7,
             maxWidth: '500px', marginBottom: '2.5rem'
           }}>
-            The ultimate platform for mechanical engineers. Interact with high-fidelity 3D models and visualize complex mechanical systems in a true 360° environment.
+            {t('hero.subtext')}
           </motion.p>
 
           {/* CTAs */}
@@ -116,7 +119,7 @@ export default function Hero() {
               whileTap={{ scale: 0.97 }}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
             >
-              Enter 360° Forge
+              {t('hero.cta_forge')}
               <ArrowRight size={16} />
             </motion.a>
             <motion.a
@@ -126,7 +129,7 @@ export default function Hero() {
               whileTap={{ scale: 0.97 }}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
             >
-              Browse Catalog
+              {t('hero.cta_catalog')}
             </motion.a>
           </motion.div>
 
@@ -136,9 +139,9 @@ export default function Hero() {
             className="stats-strip"
           >
             {[
-              { value: '15+', label: 'INTERACTIVE MODELS' },
-              { value: '360°', label: 'FULL INSPECTION' },
-              { value: '4K', label: 'MESH FIDELITY' },
+              { value: t('hero.stat_models_val'), label: t('hero.stat_models_label') },
+              { value: t('hero.stat_inspection_val'), label: t('hero.stat_inspection_label') },
+              { value: t('hero.stat_fidelity_val'), label: t('hero.stat_fidelity_label') },
             ].map((stat, i) => (
               <div key={i} className="stats-item">
                 <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#fff', fontFamily: "'Outfit', sans-serif", lineHeight: 1 }}>
