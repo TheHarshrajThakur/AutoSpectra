@@ -75,17 +75,52 @@
   },
   "models_labels": {
     "supercharger_title": "Supercharger / Intake",
-    "supercharger_desc": "Optimizes intake runner length and delivers forced induction to cylinder banks for maximal volumetric efficiency.",
+    "supercharger_fullName": "Twin-Screw Roots Supercharger & Induction Plenum",
+    "supercharger_category": "Forced Induction",
+    "supercharger_desc": "Forces compressed air into the combustion chambers at up to 1.4 bar boost, dramatically raising volumetric efficiency and instantaneous torque.",
+    "supercharger_spec": "Peak Boost: 1.4 Bar (20.3 PSI) | Dual Screw Rotors",
+
     "left_head_title": "Left Cylinder Head",
-    "left_head_desc": "Houses double overhead camshafts (DOHC), fuel injectors, spark plugs, and desmodromic valvetrain.",
+    "left_head_fullName": "Bank 1 (Left) DOHC 24V Cylinder Head & Valvetrain",
+    "left_head_category": "Valvetrain & Combustion",
+    "left_head_desc": "Houses dual overhead camshafts, direct fuel injectors, and sodium-filled exhaust valves controlling intake charge and high-velocity exhaust expulsion.",
+    "left_head_spec": "DOHC 4-Valves/Cyl | Variable Cam Phasing (VVT)",
+
     "right_head_title": "Right Cylinder Head",
-    "right_head_desc": "Encloses combustion domes, exhaust ports, and water cooling passages for the right engine bank.",
+    "right_head_fullName": "Bank 2 (Right) DOHC 24V Cylinder Head & Valvetrain",
+    "right_head_category": "Valvetrain & Combustion",
+    "right_head_desc": "Symmetric cylinder bank engineered from heat-treated A356 aluminum alloy with reinforced combustion chambers resisting peak cylinder pressures.",
+    "right_head_spec": "Compression Ratio: 10.5:1 | Cross-Flow Pent-Roof Chamber",
+
+    "block_core_title": "Engine Block Core",
+    "block_core_fullName": "Crossplane Deep-Skirt Engine Block Core & Liners",
+    "block_core_category": "Structural Core",
+    "block_core_desc": "Deep-skirt cast aluminum engine block with cast-iron cylinder liners, cross-bolted main bearing caps, and high-flow coolant jackets.",
+    "block_core_spec": "Cast A319 Aluminum | Cross-Bolted 6-Bolt Mains",
+
     "crankshaft_title": "Crankshaft Assembly",
-    "crankshaft_desc": "Heavy forged steel crank converting linear piston momentum into massive rotational torque.",
-    "timing_belt_title": "Timing Belt & Accessories",
-    "timing_belt_desc": "Synchronizes crankshaft gears with valvetrain camshafts to maintain precise engine valve timing.",
-    "block_core_title": "Engine block core",
-    "block_core_desc": "Rigid structural foundation housing cylinder bores, water jackets, and structural cooling ribs."
+    "crankshaft_fullName": "4340 Forged Steel Crossplane Crankshaft",
+    "crankshaft_category": "Rotating Assembly",
+    "crankshaft_desc": "Converts reciprocating piston motion into high-torque rotational energy, precision-balanced with tungsten counterweights to eliminate vibration.",
+    "crankshaft_spec": "4340 Forged Steel | Micro-Polished Journals | 8,200 RPM",
+
+    "timing_belt_title": "Timing Belt & Pulleys",
+    "timing_belt_fullName": "Front Serpentine Timing Belt & Pulley System",
+    "timing_belt_category": "Timing & Auxiliary Drive",
+    "timing_belt_desc": "Synchronizes crankshaft rotation with dual camshafts via tensioned multi-rib belt while driving the water pump, alternator, and oil pump.",
+    "timing_belt_spec": "Kevlar-Reinforced Belt | Torsional Vibration Damper",
+
+    "oil_pan_title": "Deep Sump Oil Pan",
+    "oil_pan_fullName": "Baffled Deep Sump Oil Pan & Scavenge Reservoir",
+    "oil_pan_category": "Lubrication System",
+    "oil_pan_desc": "Stores high-viscosity synthetic lubricant, featuring internal anti-slosh trap doors to guarantee uninterrupted oil pickup under high lateral G-forces.",
+    "oil_pan_spec": "Capacity: 6.8 Liters | Anti-Surge Directional Baffling",
+
+    "fuel_rail_title": "Direct Fuel Rail",
+    "fuel_rail_fullName": "High-Pressure Direct Fuel Injection Rail & Injectors",
+    "fuel_rail_category": "Fuel Delivery",
+    "fuel_rail_desc": "Delivers atomized fuel at up to 250 bar directly into combustion chambers with multi-stage micro-burst injection cycles for peak thermal efficiency.",
+    "fuel_rail_spec": "Rail Pressure: 250 Bar | Multi-Hole Laser Nozzles"
   },
   "gallery": {
     "badge": "Technical Archive",
@@ -135,6 +170,13 @@
       "spec": "6.2L V8",
       "desc": "A V8 engine block is the main structural body of a V8 engine that houses the cylinders, crankshaft, and other critical internal components.",
       "extendedDesc": "As the foundation of the engine, the block supports the rotating assembly while maintaining structural alignment under extreme combustion pressures. It is precision-engineered with integrated coolant jackets and oil galleries for thermal management."
+    },
+    "v6_engine": {
+      "name": "V6 Rigged & Animated Engine",
+      "type": "V6 CAD RIG",
+      "spec": "V6 Twin-Turbo CAD",
+      "desc": "A fully rigged and animated 6-cylinder internal combustion engine showcasing synchronized valvetrain, pistons, connecting rods, and twin-turbo induction.",
+      "extendedDesc": "This comprehensive 3D CAD engineering reference displays complete mechanical synchronization of a high-performance V6 power plant. Crafted and rigged by AhmedSaleh on Sketchfab, it allows deep 360° inspection of internal reciprocating kinematics."
     }
   },
   "detail": {

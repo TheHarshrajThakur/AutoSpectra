@@ -3,7 +3,7 @@ import { motion, useInView } from 'framer-motion'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stage } from '@react-three/drei'
 import { useStore } from '../../store/useStore'
-import { CrankshaftModel, PistonModel, SparkPlugModel, InternalsModel, EngineBlockModel } from '../3d/Models'
+import { CrankshaftModel, PistonModel, SparkPlugModel, InternalsModel, EngineBlockModel, AnimatedV8Model } from '../3d/Models'
 import { ArrowUpRight, Maximize2, Hand } from 'lucide-react'
 import ErrorBoundary from '../utils/ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
@@ -119,6 +119,58 @@ export const COMPONENTS = [
       { label: 'Thermal Range', value: '-40°C to 250°C' },
       { label: 'Certification', value: 'SAE, ASTM A48, ISO 9001' }
     ]
+  },
+  {
+    id: 6,
+    name: 'V6 Rigged & Animated Engine',
+    type: 'v6_sketchfab',
+    color: '#38bdf8',
+    spec: 'V6 Twin-Turbo CAD',
+    description: 'A fully rigged and animated 6-cylinder internal combustion engine showcasing synchronized valvetrain, pistons, connecting rods, and twin-turbo induction.',
+    extendedDescription: 'This comprehensive 3D CAD engineering reference displays complete mechanical synchronization of a high-performance V6 power plant. Crafted and rigged by AhmedSaleh on Sketchfab, it allows deep 360° inspection of internal reciprocating kinematics.',
+    features: [
+      'Fully rigged reciprocating assembly & pistons',
+      'Synchronized double overhead camshafts (DOHC)',
+      'Twin-turbocharger plumbing and exhaust runners',
+      'Detailed cylinder head & valvetrain kinematics',
+      'Real-time continuous animated motion cycle'
+    ],
+    specs: [
+      { label: 'Reference ID', value: 'V6-RIG-AS-CD09' },
+      { label: 'Engine Configuration', value: '60° V6 Bi-Turbo' },
+      { label: 'Valvetrain Type', value: '24-Valve DOHC' },
+      { label: 'Author Credit', value: 'AhmedSaleh (Sketchfab)' },
+      { label: 'Rigging Status', value: 'Fully Rigged & Animated' },
+      { label: 'Interactive 3D', value: 'WebGL / WebXR' }
+    ],
+    sketchfabId: 'cd09ed2b8a8e4f2792c68f952b0949de',
+    author: 'AhmedSaleh',
+    sketchfabUrl: 'https://sketchfab.com/3d-models/v6-car-engine-fully-rigged-and-animated-cd09ed2b8a8e4f2792c68f952b0949de',
+    authorUrl: 'https://sketchfab.com/AhmedSaleh'
+  },
+  {
+    id: 7,
+    name: 'Kinematic Animated V8 Assembly',
+    type: 'v8_animated',
+    color: '#06b6d4',
+    spec: 'Full Kinematic Cycle',
+    description: 'A fully animated 8-cylinder mechanical powertrain assembly showcasing real-time synchronized reciprocating pistons, crankshaft rotation, and serpentine belt drive.',
+    extendedDescription: 'This high-fidelity kinematic V8 assembly demonstrates the complete mechanical power transmission cycle in real time. Every piston stroke, connecting rod oscillation, crankshaft throw rotation, and harmonic damper pulley motion is mathematically synchronized into a continuous operating loop.',
+    features: [
+      'Real-time continuous piston reciprocating kinematics',
+      'Synchronized 90° crossplane crankshaft rotation',
+      'Front harmonic pulley & serpentine belt animation',
+      'Interactive 360° orbital zoom & rotational inspection',
+      'Optimized high-performance 128-part GLTF mesh assembly'
+    ],
+    specs: [
+      { label: 'Reference ID', value: 'V8-KIN-ANI-331CH' },
+      { label: 'Engine Architecture', value: '90° V8 Kinematic' },
+      { label: 'Animated Channels', value: '331 Rigged Samplers' },
+      { label: 'Reciprocating Units', value: '8 Balanced Pistons' },
+      { label: 'Auxiliary System', value: 'Serpentine Drive Belt' },
+      { label: 'Interactive Engine', value: 'WebGL / Three.js Native' }
+    ]
   }
 ]
 
@@ -165,6 +217,22 @@ export const getLocalizedComponents = (t) => {
       description: t('components.engine_block.desc', { defaultValue: COMPONENTS[4].description }),
       extendedDescription: t('components.engine_block.extendedDesc', { defaultValue: COMPONENTS[4].extendedDescription }),
     },
+    {
+      ...COMPONENTS[5],
+      name: t('components.v6_engine.name', { defaultValue: COMPONENTS[5].name }),
+      typeName: t('components.v6_engine.type', { defaultValue: 'V6 CAD RIG' }),
+      spec: t('components.v6_engine.spec', { defaultValue: COMPONENTS[5].spec }),
+      description: t('components.v6_engine.desc', { defaultValue: COMPONENTS[5].description }),
+      extendedDescription: t('components.v6_engine.extendedDesc', { defaultValue: COMPONENTS[5].extendedDescription }),
+    },
+    {
+      ...COMPONENTS[6],
+      name: t('components.v8_animated.name', { defaultValue: COMPONENTS[6].name }),
+      typeName: t('components.v8_animated.type', { defaultValue: 'V8 KINEMATICS' }),
+      spec: t('components.v8_animated.spec', { defaultValue: COMPONENTS[6].spec }),
+      description: t('components.v8_animated.desc', { defaultValue: COMPONENTS[6].description }),
+      extendedDescription: t('components.v8_animated.extendedDesc', { defaultValue: COMPONENTS[6].extendedDescription }),
+    },
   ];
 };
 
@@ -187,6 +255,7 @@ function ModelCard({ comp, onClick, index, t }) {
                 comp.type === 'piston' ? PistonModel : 
                 comp.type === 'spark_plug' ? SparkPlugModel : 
                 comp.type === 'engine' ? EngineBlockModel :
+                comp.type === 'v8_animated' ? AnimatedV8Model :
                 InternalsModel
 
   const toggleFullscreen = (e) => {
@@ -238,22 +307,89 @@ function ModelCard({ comp, onClick, index, t }) {
             style={{ width: '100%', height: '100%', pointerEvents: isInView ? 'auto' : 'none' }}
           >
             <ErrorBoundary>
-              <Canvas
-                dpr={1}
-                frameloop="demand"
-                gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
-                camera={{ position: [0, 0, 5], fov: 45 }}
-                style={{ width: '100%', height: '100%' }}
-              >
-                <color attach="background" args={['#000000']} />
-                <Suspense fallback={null}>
-                  <Stage intensity={0.5} environment="city" adjustCamera={1.2} shadows={false}>
-                    <Model color={comp.color} />
-                  </Stage>
-                </Suspense>
-                <OrbitControls ref={controlsRef} enableZoom={true} enablePan={false} />
-                <HandControls controlsRef={controlsRef} targetId={`comp-${comp.id}`} />
-              </Canvas>
+              {comp.type === 'v6_sketchfab' ? (
+                <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
+                  <iframe
+                    title="V6 Car Engine - Fully Rigged and Animated"
+                    src="https://sketchfab.com/models/cd09ed2b8a8e4f2792c68f952b0949de/embed?autostart=1&ui_infos=0&ui_watermark=0&ui_watermark_link=0&ui_ar=0&ui_help=0&ui_settings=0&ui_inspector=0&ui_annotations=0&ui_stop=0&preload=1&transparent=1&dnt=1"
+                    frameBorder="0"
+                    allowFullScreen
+                    mozallowfullscreen="true"
+                    webkitallowfullscreen="true"
+                    allow="autoplay; fullscreen; xr-spatial-tracking"
+                    xr-spatial-tracking="true"
+                    execution-while-out-of-viewport="true"
+                    execution-while-not-rendered="true"
+                    web-share="true"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      background: '#09090b',
+                      pointerEvents: isHovered ? 'auto' : 'none'
+                    }}
+                  />
+                  {!isHovered && (
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to top, rgba(9,9,11,0.95) 0%, rgba(9,9,11,0.2) 60%, transparent 100%)',
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'space-between',
+                      padding: '1rem',
+                      pointerEvents: 'none'
+                    }}>
+                      <span style={{
+                        fontSize: '10px',
+                        color: '#38bdf8',
+                        fontWeight: 700,
+                        background: 'rgba(56,189,248,0.15)',
+                        padding: '4px 10px',
+                        borderRadius: '100px',
+                        border: '1px solid rgba(56,189,248,0.3)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        ⚡ Hover to Interact • 3D CAD Rig
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <Canvas
+                    dpr={1}
+                    frameloop={comp.type === 'v8_animated' ? "always" : "demand"}
+                    gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
+                    camera={{ position: [0, 0, 5], fov: 45 }}
+                    style={{ width: '100%', height: '100%' }}
+                  >
+                    <color attach="background" args={['#000000']} />
+                    <Suspense fallback={null}>
+                      <Stage intensity={0.5} environment="city" adjustCamera={1.2} shadows={false}>
+                        <Model color={comp.color} isAnimated={true} speed={1} />
+                      </Stage>
+                    </Suspense>
+                    <OrbitControls ref={controlsRef} enableZoom={true} enablePan={false} />
+                    <HandControls controlsRef={controlsRef} targetId={`comp-${comp.id}`} />
+                  </Canvas>
+                  {comp.type === 'v8_animated' && (
+                    <div style={{
+                      position: 'absolute', bottom: '12px', left: '12px', zIndex: 4,
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      background: 'rgba(6, 182, 212, 0.18)',
+                      border: '1px solid rgba(6, 182, 212, 0.4)',
+                      padding: '4px 10px', borderRadius: '100px', pointerEvents: 'none'
+                    }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#06b6d4', boxShadow: '0 0 8px #06b6d4' }} />
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#67e8f9', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        ⚡ Real-Time Kinematics
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </ErrorBoundary>
           </motion.div>
         )}
@@ -379,7 +515,7 @@ export default function ComponentGallery() {
     const matchesSearch = comp.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           comp.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = activeCategory === 'All' || 
-                            (activeCategory === 'Engine' && (comp.type === 'engine' || comp.type === 'piston')) ||
+                            (activeCategory === 'Engine' && (comp.type === 'engine' || comp.type === 'piston' || comp.type === 'v6_sketchfab')) ||
                             (activeCategory === 'Ignition' && comp.type === 'spark_plug') ||
                             (activeCategory === 'Drivetrain' && (comp.type === 'crankshaft' || comp.type === 'internals'))
     return matchesSearch && matchesCategory

@@ -4,12 +4,57 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Stage, View, PerspectiveCamera } from '@react-three/drei'
 import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
-import { MainEngine } from '../3d/Models'
-import { Maximize2, Zap, Layers, RefreshCcw, Network, X, Hand } from 'lucide-react'
+import { MainEngine, AnimatedV8Model } from '../3d/Models'
+import { Maximize2, Zap, Layers, RefreshCcw, Network, X, Hand, Eye, Flame, Activity, Sparkles, Gauge, ExternalLink, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react'
 import ErrorBoundary from '../utils/ErrorBoundary'
 import { useStore } from '../../store/useStore'
 import HandGestureController from '../utils/HandGestureController'
 import HandControls from '../utils/HandControls'
+import { engineAudio } from '../../utils/engineAudioSynthesizer'
+
+function AnimatedV8Scene({ isAnimated, speed = 1 }) {
+  const controlsRef = useRef(null);
+  const isHandTracking = useStore(state => state.isHandTracking);
+
+  return (
+    <ErrorBoundary>
+      <Canvas
+        shadows={false}
+        dpr={[1, 1.2]}
+        gl={{ 
+          antialias: true, 
+          alpha: false, 
+          preserveDrawingBuffer: false, 
+          powerPreference: "high-performance"
+        }}
+        camera={{ position: [0, 0, 7], fov: 45 }}
+        style={{ width: '100%', height: '100%', background: '#09090b' }}
+      >
+        <color attach="background" args={['#09090b']} />
+        <ambientLight intensity={1.8} />
+        <directionalLight position={[10, 15, 10]} intensity={2.5} />
+        <directionalLight position={[-10, 10, -10]} intensity={1.5} color="#93c5fd" />
+        <directionalLight position={[0, -10, 5]} intensity={0.8} color="#06b6d4" />
+        <Suspense fallback={null}>
+          <Stage intensity={0.65} environment="city" adjustCamera={1.25} shadows={false}>
+            <AnimatedV8Model isAnimated={isAnimated} speed={speed} />
+          </Stage>
+        </Suspense>
+        <OrbitControls 
+          ref={controlsRef}
+          enableZoom={true} 
+          enablePan={false} 
+          makeDefault 
+          autoRotate={isAnimated && !(isHandTracking && useStore.getState().handControlTarget === 'main')}
+          autoRotateSpeed={1.5}
+          minPolarAngle={Math.PI / 4}
+          maxPolarAngle={Math.PI / 1.8}
+        />
+        <HandControls controlsRef={controlsRef} targetId="main" />
+      </Canvas>
+    </ErrorBoundary>
+  )
+}
 
 function EngineScene({ isAnimated, explosionFactor, showLabels }) {
   const controlsRef = useRef(null);
@@ -31,8 +76,12 @@ function EngineScene({ isAnimated, explosionFactor, showLabels }) {
         style={{ width: '100%', height: '100%', background: '#09090b' }}
       >
         <color attach="background" args={['#09090b']} />
+        <ambientLight intensity={1.5} />
+        <directionalLight position={[10, 15, 10]} intensity={2.5} />
+        <directionalLight position={[-10, 10, -10]} intensity={1.5} color="#93c5fd" />
+        <directionalLight position={[0, -10, 5]} intensity={0.8} color="#f97316" />
         <Suspense fallback={null}>
-          <Stage intensity={0.5} environment="city" adjustCamera={true} shadows={false}>
+          <Stage intensity={0.8} environment={null} adjustCamera={true} shadows={false}>
             <MainEngine animated={isAnimated} explosionFactor={explosionFactor} showLabels={showLabels} />
           </Stage>
         </Suspense>
@@ -202,6 +251,17 @@ function EngineMindMap({ onClose }) {
   );
 }
 
+const ENGINE_SUBSYSTEMS = [
+  { id: 'supercharger', name: 'Supercharger', fullName: 'Twin-Screw Roots Supercharger & Induction Plenum', category: 'Forced Induction', desc: 'Forces compressed air into the combustion chambers at up to 1.4 bar boost, dramatically raising volumetric efficiency and instantaneous torque.', spec: 'Peak Boost: 1.4 Bar (20.3 PSI) | Dual Screw Rotors', color: '#38bdf8' },
+  { id: 'left_head', name: 'Left Head', fullName: 'Bank 1 (Left) DOHC 24V Cylinder Head & Valvetrain', category: 'Valvetrain & Combustion', desc: 'CNC-machined aluminum cylinder head housing dual overhead camshafts, four valves per cylinder, and precision sodium-cooled exhaust valves.', spec: 'DOHC 4-Valves/Cyl | Variable Cam Phasing (VVT)', color: '#f43f5e' },
+  { id: 'right_head', name: 'Right Head', fullName: 'Bank 2 (Right) DOHC 24V Cylinder Head & Valvetrain', category: 'Valvetrain & Combustion', desc: 'Houses combustion chambers and spark plugs with optimized pent-roof quench zones for rapid, complete flame propagation.', spec: 'Compression Ratio: 10.5:1 | Cross-Flow Pent-Roof', color: '#f43f5e' },
+  { id: 'fuel_rail', name: 'Fuel Rail', fullName: 'High-Pressure Direct Fuel Injection Rail & Injectors', category: 'Fuel Delivery', desc: 'Delivers atomized fuel at up to 250 bar directly into combustion chambers with multi-stage micro-burst injection cycles.', spec: 'Rail Pressure: 250 Bar | Multi-Hole Laser Nozzles', color: '#f97316' },
+  { id: 'block_core', name: 'Block Core', fullName: 'Crossplane Deep-Skirt Engine Block Core & Liners', category: 'Structural Core', desc: 'Deep-skirt cast aluminum engine block with cast-iron cylinder liners, cross-bolted main bearing caps, and high-flow coolant jackets.', spec: 'Cast A319 Aluminum | Cross-Bolted 6-Bolt Mains', color: '#10b981' },
+  { id: 'timing_belt', name: 'Timing Belt', fullName: 'Front Serpentine Timing Belt & Pulley System', category: 'Timing & Auxiliary Drive', desc: 'Synchronizes crankshaft rotation with dual camshafts via tensioned multi-rib belt while driving the water pump, alternator, and oil pump.', spec: 'Kevlar-Reinforced Belt | Torsional Vibration Damper', color: '#a855f7' },
+  { id: 'crankshaft', name: 'Crankshaft', fullName: '4340 Forged Steel Crossplane Crankshaft', category: 'Rotating Assembly', desc: 'Precision-counterweighted 90° crossplane crankshaft designed to withstand extreme cylinder pressures with minimal torsional harmonic vibration.', spec: '4340 Forged Steel | Micro-Polished Journals | 8,200 RPM', color: '#eab308' },
+  { id: 'oil_pan', name: 'Oil Pan', fullName: 'Baffled Deep Sump Oil Pan & Scavenge Reservoir', category: 'Lubrication System', desc: 'Stores high-viscosity synthetic lubricant with internal anti-slosh trap doors to guarantee oil pickup under high lateral G-forces.', spec: 'Capacity: 6.8 Liters | Anti-Surge Directional Baffling', color: '#06b6d4' }
+];
+
 /**
  * ModelViewer Component
  * The featured 3D showcase section. Supports native 3D rendering and external engineering references.
@@ -209,18 +269,53 @@ function EngineMindMap({ onClose }) {
  */
 export default function ModelViewer() {
   const { t } = useTranslation();
-  const [source, setSource] = useState('native'); // 'native' or 'reference'
+  const viewerSource = useStore(state => state.viewerSource);
+  const setViewerSource = useStore(state => state.setViewerSource);
+  const source = viewerSource || 'native'; // 'native' or 'reference'
+  const setSource = setViewerSource;
   const [showMindMap, setShowMindMap] = useState(false);
-  const [isAnimated, setIsAnimated] = useState(true); // functions as 'running' state
+  const [showLabels, setShowLabels] = useState(true);
+  const [isHudCollapsed, setIsHudCollapsed] = useState(false);
+  const [isTelemetryCollapsed, setIsTelemetryCollapsed] = useState(false);
+
+  // Global store states
+  const visionMode = useStore(state => state.visionMode);
+  const setVisionMode = useStore(state => state.setVisionMode);
+  const crankAngle = useStore(state => state.crankAngle);
+  const setCrankAngle = useStore(state => state.setCrankAngle);
+  const isEngineIgnited = useStore(state => state.isEngineIgnited);
+  const setIsEngineIgnited = useStore(state => state.setIsEngineIgnited);
+  const mainExplosionFactor = useStore(state => state.mainExplosionFactor);
+  const setMainExplosionFactor = useStore(state => state.setMainExplosionFactor);
+  const hoveredEnginePart = useStore(state => state.hoveredEnginePart);
+  const setHoveredEnginePart = useStore(state => state.setHoveredEnginePart);
+  const selectedEnginePart = useStore(state => state.selectedEnginePart);
+  const setSelectedEnginePart = useStore(state => state.setSelectedEnginePart);
+  const activeInspectionPart = hoveredEnginePart || selectedEnginePart;
+  const isPartPinned = !!selectedEnginePart && activeInspectionPart?.id === selectedEnginePart?.id;
+
   const [explosionFactor, setExplosionFactor] = useState(0);
   const [isExploded, setIsExploded] = useState(false);
-  const [showLabels, setShowLabels] = useState(true);
+  const [animatedSpeed, setAnimatedSpeed] = useState(1);
+  const [isAnimatedPlaying, setIsAnimatedPlaying] = useState(true);
+
+  // Sync external voice command explosion changes
+  useEffect(() => {
+    setIsExploded(mainExplosionFactor > 0.5);
+  }, [mainExplosionFactor]);
   
   const isHandTracking = useStore(state => state.isHandTracking);
   const setHandTracking = useStore(state => state.setHandTracking);
 
+  // Guarantee engineAudio halts on component unmount
+  useEffect(() => {
+    return () => {
+      engineAudio.stop();
+    };
+  }, []);
+
   const REF_URL =
-    'https://sketchfab.com/models/eea9d9252ab14298b50699a471dc2cee/embed?autostart=1&ui_infos=0&ui_watermark=0&ui_watermark_link=0&ui_ar=0&ui_help=0&ui_settings=0&ui_inspector=0&ui_annotations=0&ui_stop=0&preload=1&transparent=1&dnt=1'
+    'https://sketchfab.com/models/cd09ed2b8a8e4f2792c68f952b0949de/embed?autostart=1&ui_infos=0&ui_watermark=0&ui_watermark_link=0&ui_ar=0&ui_help=0&ui_settings=0&ui_inspector=0&ui_annotations=0&ui_stop=0&preload=1&transparent=1&dnt=1'
 
   // Animate explosion factor smoothly
   useEffect(() => {
@@ -298,7 +393,7 @@ export default function ModelViewer() {
             <span>{t('viewer.badge')}</span>
           </div>
         </div>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <h2 style={{
             fontSize: '2rem', fontWeight: 700, color: '#ffffff',
             fontFamily: "'Inter', sans-serif", marginBottom: '0.5rem'
@@ -310,11 +405,92 @@ export default function ModelViewer() {
           </p>
         </div>
 
+        {/* Engine Model Switcher Bar */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.75rem' }}>
+          <div style={{
+            display: 'inline-flex',
+            padding: '4px',
+            background: 'rgba(15, 18, 28, 0.75)',
+            backdropFilter: 'blur(12px)',
+            borderRadius: '14px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            gap: '6px',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)'
+          }}>
+            <button
+              onClick={() => setSource('native')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '10px',
+                border: '1px solid',
+                borderColor: source === 'native' ? 'rgba(59, 130, 246, 0.5)' : 'transparent',
+                background: source === 'native' ? 'linear-gradient(135deg, rgba(37,99,235,0.3) 0%, rgba(59,130,246,0.2) 100%)' : 'transparent',
+                color: source === 'native' ? '#93c5fd' : '#94a3b8',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: source === 'native' ? '0 0 15px rgba(59,130,246,0.25)' : 'none'
+              }}
+            >
+              <Zap size={15} color={source === 'native' ? '#60a5fa' : '#64748b'} />
+              <span>Spectra V8 (Interactive Physics)</span>
+            </button>
+            <button
+              onClick={() => setSource('animated')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '10px',
+                border: '1px solid',
+                borderColor: source === 'animated' ? 'rgba(6, 182, 212, 0.5)' : 'transparent',
+                background: source === 'animated' ? 'linear-gradient(135deg, rgba(8,145,178,0.3) 0%, rgba(6,182,212,0.2) 100%)' : 'transparent',
+                color: source === 'animated' ? '#67e8f9' : '#94a3b8',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: source === 'animated' ? '0 0 15px rgba(6,182,212,0.25)' : 'none'
+              }}
+            >
+              <Activity size={15} color={source === 'animated' ? '#06b6d4' : '#64748b'} />
+              <span>Kinematic V8 (Live Animated)</span>
+            </button>
+            <button
+              onClick={() => setSource('reference')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '10px',
+                border: '1px solid',
+                borderColor: source === 'reference' ? 'rgba(56, 189, 248, 0.5)' : 'transparent',
+                background: source === 'reference' ? 'linear-gradient(135deg, rgba(2,132,199,0.3) 0%, rgba(56,189,248,0.2) 100%)' : 'transparent',
+                color: source === 'reference' ? '#7dd3fc' : '#94a3b8',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: source === 'reference' ? '0 0 15px rgba(56,189,248,0.25)' : 'none'
+              }}
+            >
+              <Sparkles size={15} color={source === 'reference' ? '#38bdf8' : '#64748b'} />
+              <span>Rigged V6 Model (AhmedSaleh CAD)</span>
+            </button>
+          </div>
+        </div>
+
         {/* Main Viewer Box */}
         <motion.div
           id="engine-viewer"
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="h-[500px] sm:h-[550px] lg:h-[650px] w-full"
           style={{
@@ -341,44 +517,135 @@ export default function ModelViewer() {
           </div>
 
           {/* Engine Dashboard Control Panel */}
-          {source === 'native' && (
-            <div className="engine-hud-panel" style={{
-              position: 'absolute', top: '80px', left: '20px', zIndex: 10,
-              background: 'rgba(10, 10, 15, 0.85)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              padding: '1.25rem', borderRadius: '12px',
-              width: '260px',
-              fontFamily: "'Inter', sans-serif",
-              color: '#fff',
-              boxShadow: '0 15px 35px rgba(0,0,0,0.6)',
-              display: 'flex', flexDirection: 'column', gap: '1rem',
-              transition: 'all 0.3s ease'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '8px' }}>
-                <Zap size={14} color="#3b82f6" />
-                <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#94a3b8' }}>{t('viewer.hud_diagnostics')}</span>
-              </div>
+          {source === 'native' && isHudCollapsed && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9, x: -10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              onClick={() => setIsHudCollapsed(false)}
+              title="Expand HUD Diagnostics"
+              aria-label="Expand HUD Diagnostics"
+              style={{
+                position: 'absolute',
+                top: '80px',
+                left: '20px',
+                zIndex: 10,
+                background: 'rgba(10, 10, 15, 0.88)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(59, 130, 246, 0.35)',
+                padding: '8px 14px',
+                borderRadius: '20px',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(59,130,246,0.2)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(20, 25, 40, 0.95)'
+                e.currentTarget.style.borderColor = '#3b82f6'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(10, 10, 15, 0.88)'
+                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.35)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              <div style={{
+                width: '8px', height: '8px', borderRadius: '50%',
+                background: isEngineIgnited && explosionFactor < 0.1 ? '#10b981' : '#3b82f6',
+                boxShadow: isEngineIgnited && explosionFactor < 0.1 ? '0 0 8px #10b981' : '0 0 6px #3b82f6'
+              }} />
+              <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#93c5fd' }}>
+                {t('viewer.hud_diagnostics')}
+              </span>
+              <ChevronRight size={14} color="#60a5fa" />
+            </motion.button>
+          )}
+
+          {source === 'native' && !isHudCollapsed && (
+            <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="engine-hud-panel"
+                style={{
+                  position: 'absolute', top: '80px', left: '20px', zIndex: 10,
+                  background: 'rgba(10, 10, 15, 0.85)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  padding: '1.25rem', borderRadius: '12px',
+                  width: '260px',
+                  fontFamily: "'Inter', sans-serif",
+                  color: '#fff',
+                  boxShadow: '0 15px 35px rgba(0,0,0,0.6)',
+                  display: 'flex', flexDirection: 'column', gap: '1rem',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Zap size={14} color="#3b82f6" />
+                    <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#94a3b8' }}>{t('viewer.hud_diagnostics')}</span>
+                  </div>
+                  <button
+                    onClick={() => setIsHudCollapsed(true)}
+                    title="Collapse HUD Panel"
+                    aria-label="Collapse HUD Panel"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: '6px',
+                      padding: '3px 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      color: '#94a3b8',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(59,130,246,0.2)'
+                      e.currentTarget.style.borderColor = '#3b82f6'
+                      e.currentTarget.style.color = '#fff'
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                      e.currentTarget.style.color = '#94a3b8'
+                    }}
+                  >
+                    <span>Hide</span>
+                    <ChevronLeft size={13} />
+                  </button>
+                </div>
               
-              {/* Ignition Switch */}
+              {/* Ignition Switch with Procedural Sound */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>{t('viewer.power_source')}</label>
                 <button
                   onClick={() => {
-                    if (isAnimated) {
-                      setIsAnimated(false);
+                    if (isEngineIgnited) {
+                      setIsEngineIgnited(false);
+                      engineAudio.stop();
                     } else {
                       setIsExploded(false); // Collapse before starting
-                      setIsAnimated(true);
+                      setMainExplosionFactor(0);
+                      setIsEngineIgnited(true);
+                      engineAudio.start();
                     }
                   }}
                   style={{
                     padding: '8px 14px',
                     borderRadius: '8px',
                     border: '1px solid',
-                    borderColor: isAnimated && explosionFactor < 0.1 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)',
-                    background: isAnimated && explosionFactor < 0.1 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    color: isAnimated && explosionFactor < 0.1 ? '#10b981' : '#ef4444',
+                    borderColor: isEngineIgnited && explosionFactor < 0.1 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)',
+                    background: isEngineIgnited && explosionFactor < 0.1 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                    color: isEngineIgnited && explosionFactor < 0.1 ? '#10b981' : '#ef4444',
                     fontSize: '11px',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -387,16 +654,16 @@ export default function ModelViewer() {
                     justifyContent: 'center',
                     gap: '6px',
                     transition: 'all 0.2s',
-                    boxShadow: isAnimated && explosionFactor < 0.1 ? '0 0 15px rgba(16,185,129,0.15)' : 'none'
+                    boxShadow: isEngineIgnited && explosionFactor < 0.1 ? '0 0 15px rgba(16,185,129,0.15)' : 'none'
                   }}
                 >
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%',
-                    background: isAnimated && explosionFactor < 0.1 ? '#10b981' : '#ef4444',
-                    boxShadow: isAnimated && explosionFactor < 0.1 ? '0 0 8px #10b981' : 'none',
-                    animation: isAnimated && explosionFactor < 0.1 ? 'pulse 1.5s infinite' : 'none'
+                    background: isEngineIgnited && explosionFactor < 0.1 ? '#10b981' : '#ef4444',
+                    boxShadow: isEngineIgnited && explosionFactor < 0.1 ? '0 0 8px #10b981' : 'none',
+                    animation: isEngineIgnited && explosionFactor < 0.1 ? 'pulse 1.5s infinite' : 'none'
                   }} />
-                  {isAnimated && explosionFactor < 0.1 ? t('viewer.engine_running') : t('viewer.engine_stopped')}
+                  {isEngineIgnited && explosionFactor < 0.1 ? t('viewer.engine_running') : t('viewer.engine_stopped')}
                 </button>
               </div>
 
@@ -408,9 +675,12 @@ export default function ModelViewer() {
                     onClick={() => {
                       if (isExploded) {
                         setIsExploded(false);
+                        setMainExplosionFactor(0);
                       } else {
-                        setIsAnimated(false); // Stop running before explosion
+                        setIsEngineIgnited(false);
+                        engineAudio.stop();
                         setIsExploded(true);
+                        setMainExplosionFactor(1);
                       }
                     }}
                     style={{
@@ -436,8 +706,10 @@ export default function ModelViewer() {
                     onChange={(e) => {
                       const val = parseFloat(e.target.value);
                       setExplosionFactor(val);
+                      setMainExplosionFactor(val);
                       if (val > 0.001) {
-                        setIsAnimated(false); // Pause rotation/animation on slide
+                        setIsEngineIgnited(false);
+                        engineAudio.stop();
                         setIsExploded(val > 0.5);
                       } else {
                         setIsExploded(false);
@@ -458,6 +730,47 @@ export default function ModelViewer() {
                 </div>
               </div>
 
+              {/* SpectraVision Modes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
+                  SpectraVision Shaders
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+                  {[
+                    { id: 'standard', label: 'Standard PBR', icon: Eye },
+                    { id: 'thermal', label: 'FLIR Thermal', icon: Flame },
+                    { id: 'xray', label: 'X-Ray Glass', icon: Sparkles },
+                    { id: 'cycle', label: '720° Cycle', icon: Activity }
+                  ].map(mode => {
+                    const isSelected = visionMode === mode.id;
+                    const IconComponent = mode.icon;
+                    return (
+                      <button
+                        key={mode.id}
+                        onClick={() => setVisionMode(mode.id)}
+                        style={{
+                          background: isSelected ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${isSelected ? '#3b82f6' : 'rgba(255,255,255,0.08)'}`,
+                          color: isSelected ? '#93c5fd' : '#94a3b8',
+                          padding: '5px 8px',
+                          borderRadius: '6px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <IconComponent size={12} color={isSelected ? '#60a5fa' : '#64748b'} />
+                        {mode.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
               {/* Subsystem Labels Toggle */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>{t('viewer.subsystem_labels')}</span>
@@ -475,7 +788,7 @@ export default function ModelViewer() {
                   {showLabels ? t('viewer.visible') : t('viewer.hidden')}
                 </button>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Controls Overlay */}
@@ -496,7 +809,7 @@ export default function ModelViewer() {
             >
               <Network size={18} />
             </button>
-            {source === 'native' && (
+            {(source === 'native' || source === 'animated') && (
               <>
                 <button
                   onClick={() => {
@@ -517,24 +830,45 @@ export default function ModelViewer() {
                   <Hand size={18} />
                 </button>
                 <button
-                onClick={() => setIsAnimated(!isAnimated)}
-                title={isAnimated ? t('viewer.tooltip_rotate_pause') : t('viewer.tooltip_rotate_start')}
-                style={{
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  background: 'rgba(10, 10, 15, 0.75)', border: '1px solid rgba(255, 255, 255, 0.08)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', color: isAnimated ? '#3b82f6' : '#94a3b8',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.3)', transition: 'all 0.2s'
-                }}
-              >
-                <Zap size={18} />
-              </button>
+                  onClick={() => {
+                    if (source === 'animated') {
+                      setIsAnimatedPlaying(!isAnimatedPlaying);
+                    } else {
+                      if (isEngineIgnited) {
+                        setIsEngineIgnited(false);
+                        engineAudio.stop();
+                      } else {
+                        setIsEngineIgnited(true);
+                        engineAudio.start();
+                      }
+                    }
+                  }}
+                  title={
+                    source === 'animated'
+                      ? (isAnimatedPlaying ? 'Pause Kinematic Animation' : 'Play Kinematic Animation')
+                      : (isEngineIgnited ? t('viewer.tooltip_rotate_pause') : t('viewer.tooltip_rotate_start'))
+                  }
+                  style={{
+                    width: '40px', height: '40px', borderRadius: '50%',
+                    background: 'rgba(10, 10, 15, 0.75)', border: '1px solid rgba(255, 255, 255, 0.08)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: (source === 'animated' ? isAnimatedPlaying : isEngineIgnited) ? (source === 'animated' ? '#06b6d4' : '#3b82f6') : '#94a3b8',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.3)', transition: 'all 0.2s'
+                  }}
+                >
+                  <Zap size={18} />
+                </button>
               </>
             )}
             
             <button
-              onClick={() => setSource(source === 'native' ? 'reference' : 'native')}
-              title={source === 'native' ? t('viewer.tooltip_ref_model') : t('viewer.tooltip_native_model')}
+              onClick={() => {
+                if (source === 'native') setSource('animated');
+                else if (source === 'animated') setSource('reference');
+                else setSource('native');
+              }}
+              title="Cycle Engine Model"
               style={{
                 width: '40px', height: '40px', borderRadius: '50%',
                 background: 'rgba(10, 10, 15, 0.75)', border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -561,6 +895,749 @@ export default function ModelViewer() {
             </button>
           </div>
 
+          {/* 720° Combustion Cycle Kinematics Scrubber Bar */}
+          {visionMode === 'cycle' && source === 'native' && (
+            <div style={{
+              position: 'absolute',
+              bottom: '20px',
+              left: '20px',
+              right: '280px',
+              zIndex: 15,
+              background: 'rgba(10, 12, 18, 0.92)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '12px',
+              padding: '0.75rem 1.25rem',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.7)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.4rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Activity size={15} color="#38bdf8" />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#93c5fd' }}>
+                    720° 4-Stroke Kinematics:
+                  </span>
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '100px',
+                    background: crankAngle < 180 ? 'rgba(59,130,246,0.2)' : crankAngle < 360 ? 'rgba(234,179,8,0.2)' : crankAngle < 540 ? 'rgba(239,68,68,0.25)' : 'rgba(168,85,247,0.2)',
+                    color: crankAngle < 180 ? '#60a5fa' : crankAngle < 360 ? '#facc15' : crankAngle < 540 ? '#f87171' : '#c084fc',
+                    border: `1px solid ${crankAngle < 180 ? '#3b82f6' : crankAngle < 360 ? '#eab308' : crankAngle < 540 ? '#ef4444' : '#a855f7'}`
+                  }}>
+                    {crankAngle < 180 ? '1. Intake (0°-180°)' : crankAngle < 360 ? '2. Compression (180°-360°)' : crankAngle < 540 ? '🔥 3. Power Stroke (360°-540°)' : '4. Exhaust (540°-720°)'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#fff', fontFamily: 'monospace' }}>
+                  {crankAngle}° Crank
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <input
+                  type="range"
+                  min="0"
+                  max="720"
+                  step="1"
+                  value={crankAngle}
+                  onChange={(e) => setCrankAngle(parseInt(e.target.value))}
+                  style={{
+                    flex: 1,
+                    accentColor: '#38bdf8',
+                    cursor: 'pointer',
+                    height: '5px'
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    // Auto-step slow-motion cycle
+                    let current = crankAngle;
+                    const interval = setInterval(() => {
+                      current = (current + 5) % 720;
+                      setCrankAngle(current);
+                    }, 40);
+                    setTimeout(() => clearInterval(interval), 5000);
+                  }}
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.2)',
+                    border: '1px solid #3b82f6',
+                    borderRadius: '4px',
+                    color: '#93c5fd',
+                    fontSize: '9px',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Slow-Mo 5s
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Subsystem Telemetry Inspector (Top-Right Docked, Zero Engine Occlusion) */}
+          {source === 'native' && isTelemetryCollapsed && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9, x: 10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              onClick={() => setIsTelemetryCollapsed(false)}
+              title="Expand Subsystem Telemetry Inspector"
+              aria-label="Expand Subsystem Telemetry Inspector"
+              style={{
+                position: 'absolute',
+                top: '80px',
+                right: '20px',
+                zIndex: 15,
+                background: 'rgba(10, 10, 15, 0.88)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(59, 130, 246, 0.35)',
+                padding: '8px 14px',
+                borderRadius: '20px',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(59,130,246,0.2)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(20, 25, 40, 0.95)'
+                e.currentTarget.style.borderColor = '#3b82f6'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(10, 10, 15, 0.88)'
+                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.35)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              <Activity size={14} color="#38bdf8" />
+              <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#93c5fd' }}>
+                Subsystem Telemetry
+              </span>
+              <ChevronLeft size={14} color="#60a5fa" />
+            </motion.button>
+          )}
+
+          {source === 'native' && !isTelemetryCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 15 }}
+              transition={{ duration: 0.25 }}
+              style={{
+                position: 'absolute',
+                top: '80px',
+                right: '20px',
+                width: '350px',
+                maxWidth: 'calc(100% - 40px)',
+                zIndex: 15,
+                background: 'rgba(8, 12, 22, 0.92)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: activeInspectionPart 
+                  ? `1px solid ${activeInspectionPart.color || '#3b82f6'}66` 
+                  : '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '14px',
+                padding: '16px',
+                boxShadow: activeInspectionPart
+                  ? `0 20px 40px rgba(0,0,0,0.85), 0 0 25px ${activeInspectionPart.color || '#3b82f6'}25`
+                  : '0 15px 35px rgba(0,0,0,0.6)',
+                fontFamily: "'Inter', sans-serif",
+                color: '#fff',
+                transition: 'border-color 0.3s ease, box-shadow 0.3s ease'
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{
+                    fontSize: '9px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    background: activeInspectionPart ? `${activeInspectionPart.color || '#3b82f6'}22` : 'rgba(59, 130, 246, 0.15)',
+                    color: activeInspectionPart ? (activeInspectionPart.color || '#60a5fa') : '#93c5fd',
+                    border: `1px solid ${activeInspectionPart ? (activeInspectionPart.color || '#3b82f6') : '#3b82f6'}44`
+                  }}>
+                    {activeInspectionPart?.category || 'SUBSYSTEM TELEMETRY'}
+                  </span>
+                  <span style={{
+                    fontSize: '9px',
+                    color: isPartPinned ? '#38bdf8' : activeInspectionPart ? '#10b981' : '#64748b',
+                    fontWeight: 700,
+                    fontFamily: 'monospace',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <span style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: isPartPinned ? '#38bdf8' : activeInspectionPart ? '#10b981' : '#64748b',
+                      boxShadow: isPartPinned ? '0 0 8px #38bdf8' : activeInspectionPart ? '0 0 8px #10b981' : 'none'
+                    }} />
+                    {isPartPinned ? 'PINNED' : activeInspectionPart ? 'ACTIVE SCAN' : 'STANDBY'}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {isPartPinned && (
+                    <button
+                      onClick={() => {
+                        setSelectedEnginePart(null);
+                        setHoveredEnginePart(null);
+                      }}
+                      title="Release Pinned Inspection"
+                      style={{
+                        background: 'rgba(239,68,68,0.15)',
+                        border: '1px solid rgba(239,68,68,0.3)',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        color: '#fca5a5',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Unpin
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsTelemetryCollapsed(true)}
+                    title="Collapse Inspector"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: '6px',
+                      padding: '3px 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      color: '#94a3b8',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>Hide</span>
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Subsystem Content or Standby Prompt */}
+              {activeInspectionPart ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: 800,
+                    color: '#ffffff',
+                    fontFamily: "'Outfit', sans-serif",
+                    lineHeight: 1.3,
+                    letterSpacing: '-0.01em'
+                  }}>
+                    {activeInspectionPart.fullName}
+                  </div>
+                  <p style={{
+                    fontSize: '11.5px',
+                    color: 'rgba(255,255,255,0.82)',
+                    margin: 0,
+                    lineHeight: 1.5
+                  }}>
+                    {activeInspectionPart.description}
+                  </p>
+                  {activeInspectionPart.spec && (
+                    <div style={{
+                      marginTop: '4px',
+                      padding: '8px 10px',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '10.5px',
+                      color: '#93c5fd',
+                      fontFamily: 'monospace',
+                      fontWeight: 600
+                    }}>
+                      <span style={{ color: activeInspectionPart.color || '#3b82f6' }}>⚙</span>
+                      <span>{activeInspectionPart.spec}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff', fontFamily: "'Outfit', sans-serif" }}>
+                    Interactive Engine Explorer
+                  </div>
+                  <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
+                    Hover or click any subsystem callout marker on the 3D engine to inspect CAD telemetry, materials, and internal dynamics.
+                  </p>
+                </div>
+              )}
+
+              {/* Quick Subsystem Selector Navigator */}
+              <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: '9px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+                  Subsystem Quick Select:
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  {ENGINE_SUBSYSTEMS.map((sub) => {
+                    const isSubActive = activeInspectionPart?.id === sub.id;
+                    return (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          if (selectedEnginePart?.id === sub.id) {
+                            setSelectedEnginePart(null);
+                            setHoveredEnginePart(null);
+                          } else {
+                            const data = {
+                              id: sub.id,
+                              title: sub.name,
+                              fullName: sub.fullName,
+                              category: sub.category,
+                              description: sub.desc,
+                              spec: sub.spec,
+                              color: sub.color
+                            };
+                            setSelectedEnginePart(data);
+                            setHoveredEnginePart(data);
+                          }
+                        }}
+                        onMouseEnter={() => {
+                          if (!selectedEnginePart) {
+                            setHoveredEnginePart({
+                              id: sub.id,
+                              title: sub.name,
+                              fullName: sub.fullName,
+                              category: sub.category,
+                              description: sub.desc,
+                              spec: sub.spec,
+                              color: sub.color
+                            });
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (!selectedEnginePart) {
+                            setHoveredEnginePart(null);
+                          }
+                        }}
+                        style={{
+                          background: isSubActive ? `${sub.color}25` : 'rgba(255,255,255,0.05)',
+                          border: `1px solid ${isSubActive ? sub.color : 'rgba(255,255,255,0.1)'}`,
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          color: isSubActive ? '#fff' : '#94a3b8',
+                          fontSize: '10px',
+                          fontWeight: isSubActive ? 700 : 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.18s ease'
+                        }}
+                      >
+                        {sub.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Kinematic Animated V8 HUD & Telemetry Overlay */}
+          {source === 'animated' && isHudCollapsed && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9, x: -10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              onClick={() => setIsHudCollapsed(false)}
+              title="Expand Kinematic Telemetry"
+              aria-label="Expand Kinematic Telemetry"
+              style={{
+                position: 'absolute',
+                top: '80px',
+                left: '20px',
+                zIndex: 10,
+                background: 'rgba(10, 12, 18, 0.9)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(6, 182, 212, 0.35)',
+                padding: '8px 14px',
+                borderRadius: '20px',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(6, 182, 212, 0.2)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(15, 25, 35, 0.95)'
+                e.currentTarget.style.borderColor = '#06b6d4'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(10, 12, 18, 0.9)'
+                e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.35)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              <div style={{
+                width: '8px', height: '8px', borderRadius: '50%',
+                background: isAnimatedPlaying ? '#06b6d4' : '#64748b',
+                boxShadow: isAnimatedPlaying ? '0 0 8px #06b6d4' : 'none'
+              }} />
+              <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#67e8f9' }}>
+                Kinematics Telemetry
+              </span>
+              <ChevronRight size={14} color="#06b6d4" />
+            </motion.button>
+          )}
+
+          {source === 'animated' && !isHudCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="engine-hud-panel"
+              style={{
+                position: 'absolute',
+                top: '80px',
+                left: '20px',
+                zIndex: 10,
+                background: 'rgba(10, 12, 18, 0.92)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(6, 182, 212, 0.25)',
+                padding: '1.25rem',
+                borderRadius: '14px',
+                width: '310px',
+                fontFamily: "'Inter', sans-serif",
+                color: '#fff',
+                boxShadow: '0 15px 35px rgba(0,0,0,0.6), 0 0 25px rgba(6, 182, 212, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.85rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{
+                    width: '8px', height: '8px', borderRadius: '50%',
+                    background: isAnimatedPlaying ? '#06b6d4' : '#64748b',
+                    boxShadow: isAnimatedPlaying ? '0 0 8px #06b6d4' : 'none'
+                  }} />
+                  <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#67e8f9' }}>
+                    Kinematics Telemetry
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsHudCollapsed(true)}
+                  title="Collapse HUD Panel"
+                  aria-label="Collapse HUD Panel"
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '6px',
+                    padding: '3px 8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#94a3b8',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Hide</span>
+                  <ChevronLeft size={13} />
+                </button>
+              </div>
+
+              <div>
+                <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 4px 0', lineHeight: 1.3 }}>
+                  Kinematic Animated V8 Assembly
+                </h4>
+                <p style={{ color: '#94a3b8', fontSize: '11px', lineHeight: 1.5, margin: 0 }}>
+                  High-fidelity 8-cylinder mechanical assembly with 331 synchronized animation channels driving pistons, connecting rods, crankshaft, and serpentine belts.
+                </p>
+              </div>
+
+              {/* Status Indicator & Play/Pause */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                background: isAnimatedPlaying ? 'rgba(6, 182, 212, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                border: `1px solid ${isAnimatedPlaying ? 'rgba(6, 182, 212, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{
+                    width: '7px', height: '7px', borderRadius: '50%',
+                    background: isAnimatedPlaying ? '#06b6d4' : '#ef4444',
+                    boxShadow: isAnimatedPlaying ? '0 0 6px #06b6d4' : 'none'
+                  }} />
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: isAnimatedPlaying ? '#67e8f9' : '#f87171' }}>
+                    {isAnimatedPlaying ? 'Cycle: RUNNING' : 'Cycle: PAUSED'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsAnimatedPlaying(!isAnimatedPlaying)}
+                  style={{
+                    background: isAnimatedPlaying ? 'rgba(6, 182, 212, 0.25)' : 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: '#fff',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isAnimatedPlaying ? 'Pause' : 'Resume'}
+                </button>
+              </div>
+
+              {/* Kinematic Speed Selector */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Kinematic Speed</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#06b6d4', fontFamily: 'monospace' }}>{animatedSpeed}x</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
+                  {[0.5, 1, 1.5, 2].map((spd) => (
+                    <button
+                      key={spd}
+                      onClick={() => setAnimatedSpeed(spd)}
+                      style={{
+                        padding: '5px 0',
+                        borderRadius: '6px',
+                        background: animatedSpeed === spd ? 'rgba(6, 182, 212, 0.25)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${animatedSpeed === spd ? '#06b6d4' : 'rgba(255,255,255,0.08)'}`,
+                        color: animatedSpeed === spd ? '#67e8f9' : '#94a3b8',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {spd}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Engineering Specs Grid */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Architecture</span>
+                  <span style={{ color: '#e2e8f0', fontWeight: 600 }}>90° V8 Kinematic</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Rigged Channels</span>
+                  <span style={{ color: '#e2e8f0', fontWeight: 600 }}>331 Samplers (Continuous)</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Reciprocating Array</span>
+                  <span style={{ color: '#06b6d4', fontWeight: 600 }}>8 Pistons & Connecting Rods</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* V6 Sketchfab Reference HUD & Attribution Overlay */}
+          {source === 'reference' && isHudCollapsed && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9, x: -10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              onClick={() => setIsHudCollapsed(false)}
+              title="Expand CAD Reference Info"
+              aria-label="Expand CAD Reference Info"
+              style={{
+                position: 'absolute',
+                top: '80px',
+                left: '20px',
+                zIndex: 10,
+                background: 'rgba(10, 12, 18, 0.9)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(56, 189, 248, 0.35)',
+                padding: '8px 14px',
+                borderRadius: '20px',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(56,189,248,0.2)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.95)'
+                e.currentTarget.style.borderColor = '#38bdf8'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(10, 12, 18, 0.9)'
+                e.currentTarget.style.borderColor = 'rgba(56, 189, 248, 0.35)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px #38bdf8' }} />
+              <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#7dd3fc' }}>
+                CAD Reference Info
+              </span>
+              <ChevronRight size={14} color="#38bdf8" />
+            </motion.button>
+          )}
+
+          {source === 'reference' && !isHudCollapsed && (
+            <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="engine-hud-panel"
+                style={{
+                  position: 'absolute',
+                  top: '80px',
+                  left: '20px',
+                  zIndex: 10,
+                  background: 'rgba(10, 12, 18, 0.9)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(56, 189, 248, 0.25)',
+                  padding: '1.25rem',
+                  borderRadius: '14px',
+                  width: '310px',
+                  fontFamily: "'Inter', sans-serif",
+                  color: '#fff',
+                  boxShadow: '0 15px 35px rgba(0,0,0,0.6), 0 0 25px rgba(56,189,248,0.1)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.85rem'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px #38bdf8' }} />
+                    <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7dd3fc' }}>
+                      CAD Engineering Reference
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '9px', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '2px 6px', borderRadius: '4px', fontWeight: 700, border: '1px solid rgba(56,189,248,0.3)' }}>
+                      Twin-Turbo
+                    </span>
+                    <button
+                      onClick={() => setIsHudCollapsed(true)}
+                      title="Collapse HUD Panel"
+                      aria-label="Collapse HUD Panel"
+                      style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: '6px',
+                        padding: '3px 8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: '#94a3b8',
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = 'rgba(56,189,248,0.2)'
+                        e.currentTarget.style.borderColor = '#38bdf8'
+                        e.currentTarget.style.color = '#fff'
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                        e.currentTarget.style.color = '#94a3b8'
+                      }}
+                    >
+                      <span>Hide</span>
+                      <ChevronLeft size={13} />
+                    </button>
+                  </div>
+                </div>
+
+              <div>
+                <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 4px 0', lineHeight: 1.3 }}>
+                  V6 Car Engine - Fully Rigged and Animated
+                </h4>
+                <p style={{ color: '#94a3b8', fontSize: '11px', lineHeight: 1.5, margin: 0 }}>
+                  High-fidelity 6-cylinder powerplant featuring synchronized rotating assembly, crankshaft, connecting rods, and DOHC valvetrain.
+                </p>
+              </div>
+
+              {/* Engineering Specs Grid */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Architecture</span>
+                  <span style={{ color: '#e2e8f0', fontWeight: 600 }}>60° V6 Twin-Turbo</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Valvetrain</span>
+                  <span style={{ color: '#e2e8f0', fontWeight: 600 }}>24-Valve DOHC Rigged</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Kinematics</span>
+                  <span style={{ color: '#38bdf8', fontWeight: 600 }}>Fully Animated Cycle</span>
+                </div>
+              </div>
+
+              {/* Attribution Line */}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ color: '#94a3b8' }}>
+                  By{' '}
+                  <a
+                    href="https://sketchfab.com/AhmedSaleh"
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    style={{ color: '#38bdf8', fontWeight: 700, textDecoration: 'none' }}
+                  >
+                    AhmedSaleh
+                  </a>
+                  {' '}on{' '}
+                  <a
+                    href="https://sketchfab.com/3d-models/v6-car-engine-fully-rigged-and-animated-cd09ed2b8a8e4f2792c68f952b0949de"
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    style={{ color: '#38bdf8', fontWeight: 700, textDecoration: 'none' }}
+                  >
+                    Sketchfab
+                  </a>
+                </span>
+                <a
+                  href="https://sketchfab.com/3d-models/v6-car-engine-fully-rigged-and-animated-cd09ed2b8a8e4f2792c68f952b0949de"
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#38bdf8',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  Inspect <ExternalLink size={11} />
+                </a>
+              </div>
+            </motion.div>
+          )}
+
           {/* 3D Scene / Iframe */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
             {source === 'native' ? (
@@ -570,20 +1647,37 @@ export default function ModelViewer() {
                 </div>
               }>
                 {isHandTracking && useStore.getState().handControlTarget === 'main' && <HandGestureController />}
-                <EngineScene isAnimated={isAnimated} explosionFactor={explosionFactor} showLabels={showLabels} />
+                <EngineScene isAnimated={isEngineIgnited} explosionFactor={explosionFactor} showLabels={showLabels} />
+              </Suspense>
+            ) : source === 'animated' ? (
+              <Suspense fallback={
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#6b7280', fontSize: '14px' }}>
+                  {t('viewer.loading_model')}
+                </div>
+              }>
+                {isHandTracking && useStore.getState().handControlTarget === 'main' && <HandGestureController />}
+                <AnimatedV8Scene isAnimated={isAnimatedPlaying} speed={animatedSpeed} />
               </Suspense>
             ) : (
-              <iframe
-                title="Internal Engineering Reference"
-                src={REF_URL}
-                frameBorder="0"
-                allowFullScreen
-                allow="autostart; autoplay; fullscreen; xr-spatial-tracking"
-                style={{
-                  width: '100%', height: '100%',
-                  border: 'none', background: '#09090b'
-                }}
-              />
+              <div className="sketchfab-embed-wrapper" style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <iframe
+                  title="V6 Car Engine - Fully Rigged and Animated"
+                  src={REF_URL}
+                  frameBorder="0"
+                  allowFullScreen
+                  mozallowfullscreen="true"
+                  webkitallowfullscreen="true"
+                  allow="autoplay; fullscreen; xr-spatial-tracking"
+                  xr-spatial-tracking="true"
+                  execution-while-out-of-viewport="true"
+                  execution-while-not-rendered="true"
+                  web-share="true"
+                  style={{
+                    width: '100%', height: '100%',
+                    border: 'none', background: '#09090b'
+                  }}
+                />
+              </div>
             )}
           </div>
         </motion.div>

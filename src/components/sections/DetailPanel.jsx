@@ -1,10 +1,10 @@
 import { Suspense, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Download, Settings, ShieldCheck, Cpu, Hand, Maximize2 } from 'lucide-react'
+import { ArrowLeft, Download, Settings, ShieldCheck, Cpu, Hand, Maximize2, ExternalLink } from 'lucide-react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stage } from '@react-three/drei'
 import { useParams, useNavigate } from 'react-router-dom'
-import { CrankshaftModel, PistonModel, SparkPlugModel, InternalsModel, EngineBlockModel } from '../3d/Models'
+import { CrankshaftModel, PistonModel, SparkPlugModel, InternalsModel, EngineBlockModel, AnimatedV8Model } from '../3d/Models'
 import ErrorBoundary from '../utils/ErrorBoundary'
 import { getLocalizedComponents } from './ComponentGallery'
 import HandControls from '../utils/HandControls'
@@ -15,23 +15,47 @@ import { useTranslation } from 'react-i18next'
 
 function DetailModel({ id, type, color }) {
   const controlsRef = useRef(null)
+
+  if (type === 'v6_sketchfab') {
+    return (
+      <div className="sketchfab-embed-wrapper" style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <iframe
+          title="V6 Car Engine - Fully Rigged and Animated"
+          src="https://sketchfab.com/models/cd09ed2b8a8e4f2792c68f952b0949de/embed?autostart=1&ui_infos=0&ui_watermark=0&ui_watermark_link=0&ui_ar=0&ui_help=0&ui_settings=0&ui_inspector=0&ui_annotations=0&ui_stop=0&preload=1&transparent=1&dnt=1"
+          frameBorder="0"
+          allowFullScreen
+          mozallowfullscreen="true"
+          webkitallowfullscreen="true"
+          allow="autoplay; fullscreen; xr-spatial-tracking"
+          xr-spatial-tracking="true"
+          execution-while-out-of-viewport="true"
+          execution-while-not-rendered="true"
+          web-share="true"
+          style={{ width: '100%', height: '100%', border: 'none', background: '#09090b' }}
+        />
+      </div>
+    )
+  }
+
   const Model = type === 'crankshaft' ? CrankshaftModel :
     type === 'piston' ? PistonModel :
       type === 'spark_plug' ? SparkPlugModel :
         type === 'engine' ? EngineBlockModel :
-          InternalsModel
+          type === 'v8_animated' ? AnimatedV8Model :
+            InternalsModel
 
   return (
     <ErrorBoundary>
       <Canvas
         dpr={[1, 1.5]}
+        frameloop={type === 'v8_animated' ? "always" : "demand"}
         gl={{ antialias: true, alpha: true }}
         camera={{ position: [0, 0, 5], fov: 45 }}
         style={{ width: '100%', height: '100%' }}
       >
         <Suspense fallback={null}>
           <Stage intensity={0.5} environment="city" adjustCamera={1.2} shadows={false}>
-            <Model color={color} />
+            <Model color={color} isAnimated={true} speed={1} />
           </Stage>
         </Suspense>
         <OrbitControls ref={controlsRef} enableZoom={true} enablePan={false} />
@@ -207,24 +231,26 @@ Timestamp: ${new Date().toLocaleString()}
                 position: 'absolute', top: '1.5rem', right: '1.5rem',
                 zIndex: 10, display: 'flex', gap: '12px'
               }}>
-                <button
-                  onClick={() => {
-                    const targetId = `detail-${activeModel.id}`;
-                    const currentlyActive = isHandTracking && handControlTarget === targetId;
-                    setHandTracking(!currentlyActive, targetId);
-                  }}
-                  style={{
-                    width: '40px', height: '40px', borderRadius: '10px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: (isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? 'rgba(16, 185, 129, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-                    border: (isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? '1px solid #10b981' : '1px solid #e5e7eb',
-                    cursor: 'pointer', color: (isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? '#fff' : '#374151',
-                    boxShadow: '0 4px 10px rgba(0,0,0,0.1)', transition: 'all 0.2s'
-                  }}
-                  title={(isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? t('viewer.tooltip_hand_disable') : t('viewer.tooltip_hand_enable')}
-                >
-                  <Hand size={18} />
-                </button>
+                {activeModel.type !== 'v6_sketchfab' && (
+                  <button
+                    onClick={() => {
+                      const targetId = `detail-${activeModel.id}`;
+                      const currentlyActive = isHandTracking && handControlTarget === targetId;
+                      setHandTracking(!currentlyActive, targetId);
+                    }}
+                    style={{
+                      width: '40px', height: '40px', borderRadius: '10px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: (isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? 'rgba(16, 185, 129, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                      border: (isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? '1px solid #10b981' : '1px solid #e5e7eb',
+                      cursor: 'pointer', color: (isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? '#fff' : '#374151',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)', transition: 'all 0.2s'
+                    }}
+                    title={(isHandTracking && handControlTarget === `detail-${activeModel.id}`) ? t('viewer.tooltip_hand_disable') : t('viewer.tooltip_hand_enable')}
+                  >
+                    <Hand size={18} />
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     const viewer = document.getElementById(`viewer-detail-${activeModel.id}`);
@@ -362,6 +388,35 @@ Timestamp: ${new Date().toLocaleString()}
                 </p>
               )}
             </div>
+
+            {activeModel.type === 'v6_sketchfab' && (
+              <div style={{
+                background: 'rgba(56,189,248,0.06)',
+                borderRadius: '1.25rem',
+                padding: '1.5rem',
+                border: '1px solid rgba(56,189,248,0.25)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.6rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#38bdf8', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <ExternalLink size={15} /> 3D CAD Attribution & Source
+                </div>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                  <a href="https://sketchfab.com/3d-models/v6-car-engine-fully-rigged-and-animated-cd09ed2b8a8e4f2792c68f952b0949de" target="_blank" rel="nofollow noopener noreferrer" style={{ fontWeight: 'bold', color: '#38bdf8', textDecoration: 'none' }}>
+                    V6 Car Engine - Fully Rigged and Animated
+                  </a>
+                  {' '}by{' '}
+                  <a href="https://sketchfab.com/AhmedSaleh" target="_blank" rel="nofollow noopener noreferrer" style={{ fontWeight: 'bold', color: '#38bdf8', textDecoration: 'none' }}>
+                    AhmedSaleh
+                  </a>
+                  {' '}on{' '}
+                  <a href="https://sketchfab.com" target="_blank" rel="nofollow noopener noreferrer" style={{ fontWeight: 'bold', color: '#38bdf8', textDecoration: 'none' }}>
+                    Sketchfab
+                  </a>.
+                </p>
+              </div>
+            )}
 
             {activeModel.features && (
               <div style={{ background: 'rgba(59,130,246,0.05)', borderRadius: '1.25rem', padding: '2rem', border: '1px solid rgba(59,130,246,0.1)' }}>

@@ -638,9 +638,9 @@ export default function Academy({ initialMode = 'modules' }) {
         {viewMode === 'assessment' ? (
           <V8AssessmentHub onBackToModules={() => setViewMode('modules')} />
         ) : (
-          <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
-            {/* Sidebar */}
-            <div style={{ width: '100%', maxWidth: '300px', flexShrink: 0 }} className="academy-sidebar-wrapper">
+          <div className="academy-layout-row">
+            {/* Sticky Sidebar */}
+            <aside className="academy-sidebar-wrapper">
               <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
                 <input
                   type="text"
@@ -664,10 +664,17 @@ export default function Academy({ initialMode = 'modules' }) {
                   return (
                     <button
                       key={topic.id}
-                      onClick={() => setActiveTopic(topic.id)}
+                      onClick={() => {
+                        setActiveTopic(topic.id)
+                        const contentEl = document.querySelector('.academy-content-card')
+                        if (contentEl && window.scrollY > 160) {
+                          const targetY = contentEl.getBoundingClientRect().top + window.pageYOffset - 100
+                          window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' })
+                        }
+                      }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '0.75rem',
-                        padding: '1rem', borderRadius: '0.75rem', cursor: 'pointer',
+                        padding: '0.85rem 1rem', borderRadius: '0.75rem', cursor: 'pointer',
                         background: isActive ? `rgba(${hexToRgb(topic.color)}, 0.15)` : 'transparent',
                         border: isActive ? `1px solid ${topic.color}` : '1px solid transparent',
                         color: isActive ? topic.color : 'rgba(255,255,255,0.6)',
@@ -695,8 +702,8 @@ export default function Academy({ initialMode = 'modules' }) {
               <div
                 onClick={() => setViewMode('assessment')}
                 style={{
-                  marginTop: '2rem',
-                  padding: '1.25rem',
+                  marginTop: '1.25rem',
+                  padding: '1.1rem',
                   borderRadius: '1rem',
                   background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(59,130,246,0.12))',
                   border: '1px solid rgba(239,68,68,0.3)',
@@ -718,7 +725,7 @@ export default function Academy({ initialMode = 'modules' }) {
                   <ArrowRight size={13} />
                 </div>
               </div>
-            </div>
+            </aside>
 
             {/* Content Area */}
             <motion.div
@@ -889,6 +896,52 @@ export default function Academy({ initialMode = 'modules' }) {
         .academy-main-container {
           padding: 0 2rem !important;
         }
+
+        .academy-layout-row {
+          display: flex;
+          gap: 3rem;
+          align-items: flex-start;
+          position: relative;
+        }
+
+        .academy-sidebar-wrapper {
+          width: 100%;
+          max-width: 300px;
+          flex-shrink: 0;
+          position: -webkit-sticky;
+          position: sticky;
+          top: 115px;
+          align-self: flex-start;
+          max-height: calc(100vh - 130px);
+          overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+          z-index: 20;
+          padding-right: 6px;
+        }
+
+        .academy-sidebar-wrapper::-webkit-scrollbar {
+          width: 4px;
+        }
+        .academy-sidebar-wrapper::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .academy-sidebar-wrapper::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 4px;
+        }
+        .academy-sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .academy-layout-row {
+            gap: 1.5rem;
+          }
+          .academy-sidebar-wrapper {
+            max-width: 260px;
+          }
+        }
         
         /* Mobile Layout & Padding Optimizations */
         @media (max-width: 768px) {
@@ -899,8 +952,17 @@ export default function Academy({ initialMode = 'modules' }) {
             padding: 0 1rem !important;
             gap: 1.5rem !important;
           }
+          .academy-layout-row {
+            flex-direction: column !important;
+            gap: 1.5rem !important;
+          }
           .academy-sidebar-wrapper {
+            position: static !important;
+            top: auto !important;
             max-width: 100% !important;
+            max-height: none !important;
+            overflow-y: visible !important;
+            padding-right: 0 !important;
             margin-bottom: 0.5rem !important;
             display: flex;
             flex-direction: column;

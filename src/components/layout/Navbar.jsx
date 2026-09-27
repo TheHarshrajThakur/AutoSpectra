@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Zap, Box, GraduationCap, Users, Menu, X } from 'lucide-react'
+import { Home, Zap, Box, GraduationCap, Users, Menu, X, Activity, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import LanguageSelector from './LanguageSelector'
 
 const navLinks = [
   { id: 'home', key: 'home', icon: Home },
   { id: 'showcase', key: 'showcase', icon: Zap },
+  { id: 'spectralab', key: 'spectralab', label: 'SpectraLab', icon: Activity, isHot: true },
   { id: 'inventory', key: 'inventory', icon: Box },
   { id: 'academy', key: 'academy', icon: GraduationCap },
   { id: 'about', key: 'about', icon: Users },
@@ -40,6 +41,8 @@ export default function Navbar() {
   useEffect(() => {
     if (location.pathname === '/academy' || location.pathname === '/assessment') {
       setActiveSection('academy')
+    } else if (location.pathname.startsWith('/lab') || location.pathname === '/dyno' || location.pathname === '/diagnostics' || location.pathname === '/builder') {
+      setActiveSection('spectralab')
     } else if (location.pathname === '/') {
     } else {
       setActiveSection('')
@@ -58,6 +61,10 @@ export default function Navbar() {
     }
     if (id === 'academy') {
       navigate('/academy')
+      return
+    }
+    if (id === 'spectralab') {
+      navigate('/lab')
       return
     }
     if (location.pathname !== '/') {
@@ -115,7 +122,7 @@ export default function Navbar() {
           <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }} className="nav-links">
             {navLinks.map((link) => {
               const isActive = activeSection === link.id
-              const label = t(`nav.${link.key}`)
+              const label = link.label || t(`nav.${link.key}`, { defaultValue: link.id })
               return (
                 <motion.button 
                   key={link.id} 
@@ -128,7 +135,23 @@ export default function Navbar() {
                     transition: 'color 0.3s ease', zIndex: 1
                   }}
                 >
-                  {label}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {label}
+                    {link.isHot && (
+                      <span style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 900,
+                        color: '#fff',
+                        background: 'linear-gradient(135deg, #ef4444, #f97316)',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        letterSpacing: '0.05em',
+                        boxShadow: '0 0 10px rgba(239,68,68,0.5)'
+                      }}>
+                        HOT
+                      </span>
+                    )}
+                  </span>
                   {isActive && (
                     <motion.div
                       layoutId="active-nav"
@@ -210,7 +233,7 @@ export default function Navbar() {
 
             {navLinks.map((link, i) => {
               const isActive = activeSection === link.id
-              const label = t(`nav.${link.key}`)
+              const label = link.label || t(`nav.${link.key}`, { defaultValue: link.id })
               return (
                 <motion.button 
                   key={link.id} 
@@ -223,10 +246,25 @@ export default function Navbar() {
                     background: isActive ? 'rgba(255,255,255,0.05)' : 'none', 
                     border: 'none', borderRadius: '1.25rem', textAlign: 'left',
                     fontSize: '0.95rem', fontWeight: 600, padding: '0.9rem 1.25rem', 
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>
-                  <link.icon size={18} style={{ opacity: isActive ? 1 : 0.5 }} />
-                  {label}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <link.icon size={18} style={{ opacity: isActive ? 1 : 0.5 }} />
+                    {label}
+                  </div>
+                  {link.isHot && (
+                    <span style={{
+                      fontSize: '0.62rem',
+                      fontWeight: 900,
+                      color: '#fff',
+                      background: 'linear-gradient(135deg, #ef4444, #f97316)',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.05em'
+                    }}>
+                      HOT
+                    </span>
+                  )}
                 </motion.button>
               )
             })}

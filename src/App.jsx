@@ -1,7 +1,7 @@
-import React, { useEffect, Suspense, useRef } from 'react'
+import React, { useEffect, Suspense, useRef, lazy } from 'react'
 import { motion, useScroll, useSpring } from 'framer-motion'
-import { Routes, Route, useNavigate } from 'react-router-dom'
-import { ArrowRight, Award } from 'lucide-react'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { ArrowRight, Award, Gauge, ShieldAlert, Cpu, Sparkles, Sliders } from 'lucide-react'
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import Lenis from 'lenis'
@@ -10,14 +10,43 @@ import Hero from './components/sections/Hero'
 import ModelViewer from './components/sections/ModelViewer'
 import ComponentGallery from './components/sections/ComponentGallery'
 import DetailPanel from './components/sections/DetailPanel'
-import Academy from './components/sections/Academy'
+import SpectraVoiceController from './components/utils/SpectraVoiceController'
 import { AnimatedLogo } from './components/3d/Models'
 
 import BackgroundGlow from './components/layout/BackgroundGlow'
+import ThemeProvider from './components/layout/ThemeProvider'
+import SettingsPanel from './components/layout/SettingsPanel'
 import HandGestureController from './components/utils/HandGestureController'
-import { useStore } from './store/useStore'
+import { useStore, THEME_PALETTES } from './store/useStore'
 
 import { useTranslation } from 'react-i18next'
+
+// Lazy-load heavy route components for faster initial load
+const Academy = lazy(() => import('./components/sections/Academy'))
+const SpectraLabHub = lazy(() => import('./components/sections/SpectraLabHub'))
+
+// Full-page loading spinner for lazy routes
+function PageLoader() {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      height: '80vh', gap: '1.25rem'
+    }}>
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        style={{
+          width: '40px', height: '40px', borderRadius: '50%',
+          border: '3px solid rgba(255,255,255,0.08)',
+          borderTopColor: 'var(--color-primary, #3b82f6)',
+        }}
+      />
+      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        Loading Module…
+      </span>
+    </div>
+  )
+}
 
 function HomePage() {
   const { t } = useTranslation()
@@ -66,6 +95,143 @@ function HomePage() {
     <>
       <Hero />
       <ModelViewer />
+
+      {/* SpectraLab Engineering Suite Featured Section */}
+      <section id="spectralab" style={{ padding: '6rem 0', background: 'transparent', position: 'relative' }}>
+        <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 5vw', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="section-label"
+              style={{ display: 'inline-flex', marginBottom: '0.75rem' }}
+            >
+              <span>SpectraLab Engineering Suite</span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              style={{
+                fontSize: 'clamp(2.2rem, 5vw, 4rem)',
+                fontWeight: 900,
+                letterSpacing: '-0.03em',
+                textTransform: 'uppercase',
+                fontFamily: "'Outfit', sans-serif",
+                margin: 0
+              }}
+            >
+              Real-Time <span className="text-gradient-blue">Acoustics, Dyno & Diagnostics</span>
+            </motion.h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', maxWidth: '640px', margin: '0.75rem auto 0', fontSize: '1rem', lineHeight: 1.6 }}>
+              Experience features never before seen in an automotive platform: pure mathematical sound synthesis, live dyno power pulls, acoustic knock injection, and custom thermodynamic architecture.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            {/* Card 1: Dyno */}
+            <motion.div
+              whileHover={{ y: -8, scale: 1.02 }}
+              onClick={() => navigate('/dyno')}
+              className="glass-card card-hover"
+              style={{
+                background: 'rgba(15, 18, 28, 0.7)',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+                borderRadius: '1.5rem',
+                padding: '2rem',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+              }}
+            >
+              <div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', border: '1px solid rgba(59,130,246,0.3)' }}>
+                  <Gauge size={24} color="#60a5fa" />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', margin: '0 0 0.5rem 0' }}>
+                  SpectraDyno Bench
+                </h3>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                  Procedural Web Audio API V8 acoustics up to 8,500 RPM, live dyno sweep curves, cherry-red manifold glow, and 0–100 drag strip launch control.
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#60a5fa', fontSize: '0.85rem', fontWeight: 700, marginTop: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Launch Dyno Pull <ArrowRight size={16} />
+              </div>
+            </motion.div>
+
+            {/* Card 2: Diagnostics */}
+            <motion.div
+              whileHover={{ y: -8, scale: 1.02 }}
+              onClick={() => navigate('/diagnostics')}
+              className="glass-card card-hover"
+              style={{
+                background: 'rgba(15, 18, 28, 0.7)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                borderRadius: '1.5rem',
+                padding: '2rem',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+              }}
+            >
+              <div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', border: '1px solid rgba(239,68,68,0.3)' }}>
+                  <ShieldAlert size={24} color="#f87171" />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', margin: '0 0 0.5rem 0' }}>
+                  Acoustic OBD-II Lab
+                </h3>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                  Inject mechanical failure modes: spun rod knock, cylinder misfires, and pre-ignition detonation. Inspect real-time FFT frequency spectrum spikes and DTC codes.
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f87171', fontSize: '0.85rem', fontWeight: 700, marginTop: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Open Diagnostics <ArrowRight size={16} />
+              </div>
+            </motion.div>
+
+            {/* Card 3: SpecForge */}
+            <motion.div
+              whileHover={{ y: -8, scale: 1.02 }}
+              onClick={() => navigate('/builder')}
+              className="glass-card card-hover"
+              style={{
+                background: 'rgba(15, 18, 28, 0.7)',
+                border: '1px solid rgba(168, 85, 247, 0.25)',
+                borderRadius: '1.5rem',
+                padding: '2rem',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+              }}
+            >
+              <div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(168,85,247,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', border: '1px solid rgba(168,85,247,0.3)' }}>
+                  <Sliders size={24} color="#c084fc" />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', margin: '0 0 0.5rem 0' }}>
+                  SpecForge Architect
+                </h3>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                  Customize cylinder bore, stroke, compression ratio, and forced induction boost. Compute mean piston speeds, theoretical Otto cycle thermal efficiency, and peak BHP.
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c084fc', fontSize: '0.85rem', fontWeight: 700, marginTop: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Build Custom V8 <ArrowRight size={16} />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       <ComponentGallery />
 
       {/* Learn / Academy Section */}
@@ -228,6 +394,7 @@ function HomePage() {
 
 export default function App() {
   const { t } = useTranslation()
+  const location = useLocation()
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 })
   const isHandTracking = useStore(state => state.isHandTracking)
@@ -264,80 +431,91 @@ export default function App() {
   ]
 
   return (
-    <div ref={containerRef} style={{ background: '#050505', color: '#fff', minHeight: '100vh', position: 'relative' }}>
+    <div ref={containerRef} style={{ background: 'var(--color-surface, #050505)', color: 'var(--color-text, #fff)', minHeight: '100vh', position: 'relative' }}>
+      <ThemeProvider />
       <BackgroundGlow />
       {/* Progress Bar */}
       <motion.div
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, height: '2px',
-          background: 'linear-gradient(90deg, #1d4ed8, #3b82f6, #60a5fa)',
+          background: 'var(--color-gradient, linear-gradient(90deg, #1d4ed8, #3b82f6, #60a5fa))',
           transformOrigin: '0%', scaleX, zIndex: 1000
         }}
       />
 
       <Navbar />
+      <SpectraVoiceController />
+      <SettingsPanel />
 
       <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/part/:id" element={<DetailPanel />} />
-          <Route path="/academy" element={<Academy />} />
-          <Route path="/assessment" element={<Academy initialMode="assessment" />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/part/:id" element={<DetailPanel />} />
+            <Route path="/academy" element={<Academy />} />
+            <Route path="/assessment" element={<Academy initialMode="assessment" />} />
+            <Route path="/lab" element={<SpectraLabHub />} />
+            <Route path="/dyno" element={<SpectraLabHub initialTab="dyno" />} />
+            <Route path="/diagnostics" element={<SpectraLabHub initialTab="diagnostics" />} />
+            <Route path="/builder" element={<SpectraLabHub initialTab="builder" />} />
+          </Routes>
+        </Suspense>
       </main>
 
-      {/* Footer */}
-      <footer style={{
-        padding: '6rem 1.5rem 3rem', borderTop: '1px solid rgba(255,255,255,0.05)',
-        background: '#050505', position: 'relative'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-16">
-            {/* Branding Column */}
-            <div className="col-span-1 sm:col-span-2 mobile-center">
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', height: '2.8rem' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, textTransform: 'uppercase', fontFamily: "'Outfit', sans-serif" }}>
-                  <span className="text-icy">Auto Spectra</span>
+      {/* Footer - Only shown on Home page */}
+      {location.pathname === '/' && (
+        <footer style={{
+          padding: '6rem 1.5rem 3rem', borderTop: '1px solid rgba(255,255,255,0.05)',
+          background: 'var(--color-surface, #050505)', position: 'relative'
+        }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-16">
+              {/* Branding Column */}
+              <div className="col-span-1 sm:col-span-2 mobile-center">
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', height: '2.8rem' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, textTransform: 'uppercase', fontFamily: "'Outfit', sans-serif" }}>
+                    <span className="text-icy">Auto Spectra</span>
+                  </div>
                 </div>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', lineHeight: 1.7, maxWidth: '400px' }}>
+                  {t('footer.desc')}
+                </p>
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', lineHeight: 1.7, maxWidth: '400px' }}>
-                {t('footer.desc')}
-              </p>
+
+              {/* Quick Links */}
+              <div className="mobile-center">
+                <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('footer.platform_title')}</h4>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {platformLinks.map(link => (
+                    <li key={link.label}><a href={link.href} style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>{link.label}</a></li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Resources */}
+              <div className="mobile-center">
+                <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('footer.resources_title')}</h4>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {resourceLinks.map(link => (
+                    <li key={link.label}><a href={link.href} style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>{link.label}</a></li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
-            {/* Quick Links */}
-            <div className="mobile-center">
-              <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('footer.platform_title')}</h4>
-              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {platformLinks.map(link => (
-                  <li key={link.label}><a href={link.href} style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>{link.label}</a></li>
+            <div className="mobile-center" style={{ paddingTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', fontWeight: 500 }}>
+                {t('footer.copyright')}
+              </span>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }} />
                 ))}
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div className="mobile-center">
-              <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('footer.resources_title')}</h4>
-              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {resourceLinks.map(link => (
-                  <li key={link.label}><a href={link.href} style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>{link.label}</a></li>
-                ))}
-              </ul>
+              </div>
             </div>
           </div>
-
-          <div className="mobile-center" style={{ paddingTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', fontWeight: 500 }}>
-              {t('footer.copyright')}
-            </span>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   )
 }

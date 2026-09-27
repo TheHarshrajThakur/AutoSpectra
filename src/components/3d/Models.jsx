@@ -1,9 +1,11 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { useGLTF, Float, useAnimations, Html } from '@react-three/drei'
+import { useGLTF, Float, useAnimations, Html, Center } from '@react-three/drei'
 import * as THREE from 'three'
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import { useStore } from '../../store/useStore'
 
 const ENGINE_URL = '/models/Web.glb'
 
@@ -41,71 +43,213 @@ function getDisplacementDirection(originalPos) {
   return radial.multiplyScalar(0.8)
 }
 
-function EngineLabel({ position, title, description, active }) {
+function EngineLabel({ 
+  position, 
+  title, 
+  fullName, 
+  category = 'Mechanical Subsystem', 
+  description, 
+  spec, 
+  color = '#3b82f6', 
+  active,
+  id
+}) {
   const [hovered, setHovered] = useState(false)
-  
+  const setHoveredEnginePart = useStore(state => state.setHoveredEnginePart)
+  const selectedEnginePart = useStore(state => state.selectedEnginePart)
+  const setSelectedEnginePart = useStore(state => state.setSelectedEnginePart)
+
   if (!active) return null
-  
+
+  const isPinned = selectedEnginePart?.id === id
+  const isVisible = hovered || isPinned
+
+  const handleMouseEnter = () => {
+    setHovered(true)
+    if (setHoveredEnginePart) {
+      setHoveredEnginePart({
+        id,
+        title,
+        fullName: fullName || title,
+        category,
+        description,
+        spec,
+        color
+      })
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setHovered(false)
+    if (setHoveredEnginePart && !selectedEnginePart) {
+      setHoveredEnginePart(null)
+    }
+  }
+
+  const handleTogglePin = (e) => {
+    e.stopPropagation()
+    if (isPinned) {
+      if (setSelectedEnginePart) setSelectedEnginePart(null)
+      if (setHoveredEnginePart) setHoveredEnginePart(null)
+    } else {
+      const partData = {
+        id,
+        title,
+        fullName: fullName || title,
+        category,
+        description,
+        spec,
+        color
+      }
+      if (setSelectedEnginePart) setSelectedEnginePart(partData)
+      if (setHoveredEnginePart) setHoveredEnginePart(partData)
+    }
+  }
+
+  return (
+    <Html position={position} center distanceFactor={7} style={{ pointerEvents: 'none' }}>
+      <div 
+        style={{ 
+          position: 'relative', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          zIndex: isVisible ? 999 : 50,
+          pointerEvents: 'auto'
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Pulse Dot & Badge Container */}
+        <div 
+          onClick={handleTogglePin}
+          title={isPinned ? "Click to unlock" : "Click to lock telemetry inspection"}
+          style={{
+            background: isVisible ? 'rgba(10, 15, 26, 0.98)' : 'rgba(7, 10, 18, 0.88)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: `1.5px solid ${isVisible ? color : 'rgba(59, 130, 246, 0.35)'}`,
+            padding: '5px 12px',
+            borderRadius: '30px',
+            color: '#fff',
+            fontSize: '11px',
+            fontWeight: 700,
+            fontFamily: "'Outfit', 'Inter', sans-serif",
+            whiteSpace: 'nowrap',
+            boxShadow: isVisible 
+              ? `0 0 25px ${color}99, 0 8px 24px rgba(0,0,0,0.85)` 
+              : '0 4px 15px rgba(0,0,0,0.6), 0 0 10px rgba(59, 130, 246, 0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '7px',
+            cursor: 'pointer',
+            transform: isVisible ? 'scale(1.08)' : 'scale(1)',
+            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+            userSelect: 'none'
+          }}
+        >
+          {/* Pulsing Core Ring */}
+          <div style={{ position: 'relative', width: '8px', height: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              borderRadius: '50%',
+              background: color,
+              opacity: isVisible ? 0.9 : 0.6,
+              animation: 'ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite'
+            }} />
+            <span style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: color,
+              boxShadow: `0 0 8px ${color}`
+            }} />
+          </div>
+          
+          <span style={{ letterSpacing: '0.02em', color: isVisible ? '#fff' : 'rgba(255,255,255,0.92)' }}>
+            {title}
+          </span>
+
+          {isPinned && (
+            <span style={{
+              fontSize: '8px',
+              background: color,
+              color: '#000',
+              fontWeight: 900,
+              padding: '1px 5px',
+              borderRadius: '10px',
+              letterSpacing: '0.05em'
+            }}>
+              LOCKED
+            </span>
+          )}
+        </div>
+
+        {/* CAD Schematic Pointer Stem */}
+        <div style={{
+          width: '1.5px',
+          height: '14px',
+          background: `linear-gradient(to bottom, ${isVisible ? color : 'rgba(59,130,246,0.6)'}, transparent)`,
+          transition: 'background 0.2s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-end'
+        }}>
+          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: isVisible ? color : 'rgba(59,130,246,0.8)' }} />
+        </div>
+      </div>
+    </Html>
+  )
+}
+
+function ThermalLabel({ position, temp, title, subtitle, color = '#ef4444' }) {
+  const [hovered, setHovered] = useState(false)
   return (
     <Html position={position} center distanceFactor={6}>
       <div 
-        style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 100 }}
+        style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 120, cursor: 'pointer' }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <div style={{
-          background: 'rgba(5, 5, 5, 0.9)',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(59, 130, 246, 0.4)',
-          padding: '6px 12px',
+          background: 'rgba(10, 10, 15, 0.95)',
+          border: `1px solid ${color}`,
+          padding: '4px 10px',
           borderRadius: '20px',
           color: '#fff',
           fontSize: '11px',
-          fontWeight: 600,
-          fontFamily: "'Inter', sans-serif",
-          whiteSpace: 'nowrap',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.6), 0 0 10px rgba(59, 130, 246, 0.2)',
+          fontWeight: 800,
+          fontFamily: 'monospace',
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          cursor: 'pointer',
-          transform: hovered ? 'scale(1.05)' : 'scale(1)',
-          transition: 'all 0.2s ease-in-out'
+          boxShadow: `0 0 15px ${color}66, 0 4px 12px rgba(0,0,0,0.8)`
         }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3b82f6', boxShadow: '0 0 6px #3b82f6' }} />
-          {title}
+          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}` }} />
+          <span>{temp}</span>
+          <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '9px' }}>{title}</span>
         </div>
-        
-        {/* Tooltip Description */}
-        <AnimatePresence>
-          {hovered && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              style={{
-                position: 'absolute',
-                top: '35px',
-                width: '240px',
-                background: 'rgba(10, 10, 15, 0.96)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                color: 'rgba(255,255,255,0.85)',
-                fontSize: '11px',
-                lineHeight: 1.5,
-                fontFamily: "'Inter', sans-serif",
-                textAlign: 'center',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.8)',
-                pointerEvents: 'none'
-              }}
-            >
-              {description}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {hovered && (
+          <div style={{
+            position: 'absolute',
+            top: '32px',
+            width: '180px',
+            background: 'rgba(15, 18, 25, 0.96)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '6px',
+            padding: '6px 10px',
+            color: '#cbd5e1',
+            fontSize: '10px',
+            lineHeight: 1.4,
+            textAlign: 'center',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.8)'
+          }}>
+            {subtitle}
+          </div>
+        )}
       </div>
     </Html>
   )
@@ -118,10 +262,16 @@ export function MainEngine({ animated = true, explosionFactor = 0, showLabels = 
   const { actions, names } = useAnimations(animations, group)
   
   const originalPositions = useRef(new Map())
+  const originalMaterials = useRef(new Map())
+  const thermalMaterials = useRef(new Map())
+  const xrayMaterials = useRef(new Map())
   const meshNodes = useRef([])
   const wasExploded = useRef(false)
 
-  // Cache original coordinates on load
+  const visionMode = useStore(state => state.visionMode)
+  const crankAngle = useStore(state => state.crankAngle)
+
+  // Cache original coordinates and materials on load
   useEffect(() => {
     const list = []
     scene.traverse((child) => {
@@ -135,24 +285,82 @@ export function MainEngine({ animated = true, explosionFactor = 0, showLabels = 
             displacement: getDisplacementDirection(child.position)
           })
         }
+        if (!originalMaterials.current.has(child.uuid)) {
+          originalMaterials.current.set(child.uuid, child.material)
+
+          // Precompute FLIR Thermal Material based on vertical height Y
+          const y = child.position.y
+          let thermalColor = '#f97316' // Orange (mid block ~400°C)
+          let heatTemp = '420°C'
+          if (y > 0.35) {
+            thermalColor = '#ef4444' // Cherry red / White hot (~920°C heads)
+            heatTemp = '920°C'
+          } else if (y < -0.3) {
+            thermalColor = '#3b82f6' // Blue / Cyan (~85°C oil pan)
+            heatTemp = '85°C'
+          }
+
+          thermalMaterials.current.set(child.uuid, new THREE.MeshStandardMaterial({
+            color: thermalColor,
+            emissive: thermalColor,
+            emissiveIntensity: 0.45,
+            metalness: 0.3,
+            roughness: 0.4
+          }))
+
+          // Precompute Hologram X-Ray Material
+          xrayMaterials.current.set(child.uuid, new THREE.MeshStandardMaterial({
+            color: '#06b6d4',
+            emissive: '#0891b2',
+            emissiveIntensity: 0.5,
+            transparent: true,
+            opacity: 0.38,
+            wireframe: false,
+            metalness: 0.8,
+            roughness: 0.2
+          }))
+        }
       }
     })
     meshNodes.current = list
   }, [scene])
 
-  // Play rotation animation when not exploded
+  // Material Swapper based on visionMode
+  useEffect(() => {
+    if (meshNodes.current.length === 0) return
+
+    meshNodes.current.forEach((mesh) => {
+      if (visionMode === 'thermal') {
+        const mat = thermalMaterials.current.get(mesh.uuid)
+        if (mat) mesh.material = mat
+      } else if (visionMode === 'xray') {
+        const mat = xrayMaterials.current.get(mesh.uuid)
+        if (mat) mesh.material = mat
+      } else {
+        // Standard / Cycle -> restore original
+        const origMat = originalMaterials.current.get(mesh.uuid)
+        if (origMat) mesh.material = origMat
+      }
+    })
+  }, [visionMode])
+
+  // Play rotation animation when not exploded & not in manual crank cycle mode
   useEffect(() => {
     if (names.length > 0) {
-      if (animated && explosionFactor === 0) {
+      if (animated && explosionFactor === 0 && visionMode !== 'cycle') {
         actions[names[0]]?.reset().fadeIn(0.5).play()
       } else {
         actions[names[0]]?.fadeOut(0.2)
       }
     }
-  }, [animated, explosionFactor, actions, names])
+  }, [animated, explosionFactor, visionMode, actions, names])
 
-  // Apply explosion offsets per frame
+  // Apply explosion offsets and crank rotation per frame
   useFrame(() => {
+    if (visionMode === 'cycle' && group.current) {
+      group.current.rotation.y = (crankAngle * Math.PI) / 360
+    }
+
     if (meshNodes.current.length === 0) return
 
     const factor = explosionFactor
@@ -172,48 +380,147 @@ export function MainEngine({ animated = true, explosionFactor = 0, showLabels = 
     }
   })
 
-  // Subsystem Label Coordinates
-  const labelsActive = showLabels && explosionFactor > 0.5
+  // Subsystem Label Coordinates - visible whenever showLabels is true in standard mode
+  const labelsActive = showLabels && visionMode === 'standard'
+  const isCombustionFiring = visionMode === 'cycle' && (crankAngle >= 350 && crankAngle <= 430)
   
   return (
     <group ref={group} {...props}>
       <primitive object={scene} />
+
+      {/* Internal Combustion Flash Light for 720° Cycle Mode */}
+      {isCombustionFiring && (
+        <pointLight position={[0, 0.4, 0]} color="#f97316" intensity={18} distance={4} decay={2} />
+      )}
+
+      {/* FLIR Thermal Hotspot Telemetry Probes */}
+      {visionMode === 'thermal' && (
+        <>
+          <ThermalLabel 
+            position={[0, 1.9, 0]} 
+            temp="68°C" 
+            title="Supercharger" 
+            subtitle="Intercooled forced induction charge air"
+            color="#38bdf8"
+          />
+          <ThermalLabel 
+            position={[-1.4, 0.9, 0.2]} 
+            temp="942°C" 
+            title="Left Head" 
+            subtitle="Primary combustion flame front & exhaust ports"
+            color="#ef4444"
+          />
+          <ThermalLabel 
+            position={[1.4, 0.9, 0.2]} 
+            temp="938°C" 
+            title="Right Head" 
+            subtitle="High thermal flux zone near spark plug tips"
+            color="#ef4444"
+          />
+          <ThermalLabel 
+            position={[0, 0.1, -0.3]} 
+            temp="185°C" 
+            title="Engine Block" 
+            subtitle="Jacketed cast aluminum water passages"
+            color="#f97316"
+          />
+          <ThermalLabel 
+            position={[0, -0.9, 0]} 
+            temp="88°C" 
+            title="Oil Sump" 
+            subtitle="Lubricant reservoir within ideal operating range"
+            color="#3b82f6"
+          />
+        </>
+      )}
       
       {/* Subsystem interactive overlay markers */}
       <EngineLabel 
-        position={[0, 1.8 + explosionFactor * 2.0, 0]} 
-        title={t('models_labels.supercharger_title')} 
+        id="supercharger"
+        position={[0, 2.1 + explosionFactor * 1.5, 0.1]} 
+        title={t('models_labels.supercharger_title', { defaultValue: 'Supercharger / Intake' })} 
+        fullName={t('models_labels.supercharger_fullName', { defaultValue: 'Twin-Screw Roots Supercharger & Induction Plenum' })}
+        category={t('models_labels.supercharger_category', { defaultValue: 'Forced Induction' })}
         description={t('models_labels.supercharger_desc')}
+        spec={t('models_labels.supercharger_spec', { defaultValue: 'Peak Boost: 1.4 Bar (20.3 PSI) | Dual Screw Rotors' })}
+        color="#38bdf8"
         active={labelsActive}
       />
       <EngineLabel 
-        position={[-1.5 - explosionFactor * 1.5, 0.8 + explosionFactor * 1.2, 0.2]} 
-        title={t('models_labels.left_head_title')} 
+        id="left_head"
+        position={[-1.9 - explosionFactor * 1.3, 1.15 + explosionFactor * 0.9, 0.1]} 
+        title={t('models_labels.left_head_title', { defaultValue: 'Left Cylinder Head' })} 
+        fullName={t('models_labels.left_head_fullName', { defaultValue: 'Bank 1 (Left) DOHC 24V Cylinder Head & Valvetrain' })}
+        category={t('models_labels.left_head_category', { defaultValue: 'Valvetrain & Combustion' })}
         description={t('models_labels.left_head_desc')}
+        spec={t('models_labels.left_head_spec', { defaultValue: 'DOHC 4-Valves/Cyl | Variable Cam Phasing (VVT)' })}
+        color="#f43f5e"
         active={labelsActive}
       />
       <EngineLabel 
-        position={[1.5 + explosionFactor * 1.5, 0.8 + explosionFactor * 1.2, 0.2]} 
-        title={t('models_labels.right_head_title')} 
+        id="right_head"
+        position={[1.9 + explosionFactor * 1.3, 1.15 + explosionFactor * 0.9, 0.1]} 
+        title={t('models_labels.right_head_title', { defaultValue: 'Right Cylinder Head' })} 
+        fullName={t('models_labels.right_head_fullName', { defaultValue: 'Bank 2 (Right) DOHC 24V Cylinder Head & Valvetrain' })}
+        category={t('models_labels.right_head_category', { defaultValue: 'Valvetrain & Combustion' })}
         description={t('models_labels.right_head_desc')}
+        spec={t('models_labels.right_head_spec', { defaultValue: 'Compression Ratio: 10.5:1 | Cross-Flow Pent-Roof' })}
+        color="#f43f5e"
         active={labelsActive}
       />
       <EngineLabel 
-        position={[0, -0.6 - explosionFactor * 1.8, 0]} 
-        title={t('models_labels.crankshaft_title')} 
-        description={t('models_labels.crankshaft_desc')}
+        id="fuel_rail"
+        position={[-0.85 - explosionFactor * 0.5, 1.65 + explosionFactor * 1.1, 0.2]} 
+        title={t('models_labels.fuel_rail_title', { defaultValue: 'Direct Fuel Rail' })} 
+        fullName={t('models_labels.fuel_rail_fullName', { defaultValue: 'High-Pressure Direct Fuel Injection Rail & Injectors' })}
+        category={t('models_labels.fuel_rail_category', { defaultValue: 'Fuel Delivery' })}
+        description={t('models_labels.fuel_rail_desc', { defaultValue: 'Delivers atomized fuel at up to 250 bar directly into combustion chambers with multi-stage micro-burst injection cycles.' })}
+        spec={t('models_labels.fuel_rail_spec', { defaultValue: 'Rail Pressure: 250 Bar | Multi-Hole Laser Nozzles' })}
+        color="#f97316"
         active={labelsActive}
       />
       <EngineLabel 
-        position={[0, 0.3, 0.6 + explosionFactor * 1.8]} 
-        title={t('models_labels.timing_belt_title')} 
-        description={t('models_labels.timing_belt_desc')}
-        active={labelsActive}
-      />
-      <EngineLabel 
-        position={[0, 0.1, -0.2]} 
-        title={t('models_labels.block_core_title')} 
+        id="block_core"
+        position={[0, 0.15 + explosionFactor * 0.3, 0.85]} 
+        title={t('models_labels.block_core_title', { defaultValue: 'Engine Block Core' })} 
+        fullName={t('models_labels.block_core_fullName', { defaultValue: 'Crossplane Deep-Skirt Engine Block Core & Liners' })}
+        category={t('models_labels.block_core_category', { defaultValue: 'Structural Core' })}
         description={t('models_labels.block_core_desc')}
+        spec={t('models_labels.block_core_spec', { defaultValue: 'Cast A319 Aluminum | Cross-Bolted 6-Bolt Mains' })}
+        color="#10b981"
+        active={labelsActive}
+      />
+      <EngineLabel 
+        id="timing_belt"
+        position={[0, -0.55, 1.05 + explosionFactor * 1.2]} 
+        title={t('models_labels.timing_belt_title', { defaultValue: 'Timing Belt & Pulleys' })} 
+        fullName={t('models_labels.timing_belt_fullName', { defaultValue: 'Front Serpentine Timing Belt & Pulley System' })}
+        category={t('models_labels.timing_belt_category', { defaultValue: 'Timing & Auxiliary Drive' })}
+        description={t('models_labels.timing_belt_desc')}
+        spec={t('models_labels.timing_belt_spec', { defaultValue: 'Kevlar-Reinforced Belt | Torsional Vibration Damper' })}
+        color="#a855f7"
+        active={labelsActive}
+      />
+      <EngineLabel 
+        id="crankshaft"
+        position={[-0.95 - explosionFactor * 0.5, -1.1 - explosionFactor * 0.8, 0.1]} 
+        title={t('models_labels.crankshaft_title', { defaultValue: 'Crankshaft Assembly' })} 
+        fullName={t('models_labels.crankshaft_fullName', { defaultValue: '4340 Forged Steel Crossplane Crankshaft' })}
+        category={t('models_labels.crankshaft_category', { defaultValue: 'Rotating Assembly' })}
+        description={t('models_labels.crankshaft_desc')}
+        spec={t('models_labels.crankshaft_spec', { defaultValue: '4340 Forged Steel | Micro-Polished Journals | 8,200 RPM' })}
+        color="#eab308"
+        active={labelsActive}
+      />
+      <EngineLabel 
+        id="oil_pan"
+        position={[0, -1.9 - explosionFactor * 1.2, 0]} 
+        title={t('models_labels.oil_pan_title', { defaultValue: 'Deep Sump Oil Pan' })} 
+        fullName={t('models_labels.oil_pan_fullName', { defaultValue: 'Baffled Deep Sump Oil Pan & Scavenge Reservoir' })}
+        category={t('models_labels.oil_pan_category', { defaultValue: 'Lubrication System' })}
+        description={t('models_labels.oil_pan_desc', { defaultValue: 'Stores high-viscosity synthetic lubricant with internal anti-slosh trap doors to guarantee oil pickup under high lateral G-forces.' })}
+        spec={t('models_labels.oil_pan_spec', { defaultValue: 'Capacity: 6.8 Liters | Anti-Surge Directional Baffling' })}
+        color="#06b6d4"
         active={labelsActive}
       />
     </group>
@@ -260,6 +567,60 @@ export function EngineBlockModel({ ...props }) {
 }
 
 useGLTF.preload(ENGINE_BLOCK_URL)
+
+export const V8_ANIMATED_URL = '/models/v8_anii.glb'
+
+export function AnimatedV8Model({ isAnimated = true, speed = 1, ...props }) {
+  const group = useRef()
+  const { scene, animations } = useGLTF(V8_ANIMATED_URL)
+  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene])
+  const { actions } = useAnimations(animations, group)
+
+  useEffect(() => {
+    if (clone) {
+      clone.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.castShadow = true
+          child.receiveShadow = true
+          if (child.material.isMeshStandardMaterial) {
+            child.material.envMapIntensity = 1.2
+            child.material.roughness = Math.min(child.material.roughness ?? 0.35, 0.45)
+            child.material.metalness = Math.max(child.material.metalness ?? 0.6, 0.6)
+            child.material.needsUpdate = true
+          }
+        }
+      })
+    }
+  }, [clone])
+
+  useEffect(() => {
+    const action = actions['Take 001']
+    if (action) {
+      action.setEffectiveTimeScale(speed)
+      if (isAnimated) {
+        action.paused = false
+        if (!action.isRunning()) {
+          action.reset().fadeIn(0.2).play()
+        }
+      } else {
+        action.paused = true
+      }
+    }
+    return () => {
+      if (action) action.fadeOut(0.2)
+    }
+  }, [actions, isAnimated, speed])
+
+  return (
+    <group ref={group} {...props}>
+      <Center>
+        <primitive object={clone} scale={0.0035} />
+      </Center>
+    </group>
+  )
+}
+
+useGLTF.preload(V8_ANIMATED_URL)
 
 export function AnimatedLogo({ speed = 0.5, reverse = false, phase = 0, ...props }) {
   const group = useRef()
