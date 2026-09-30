@@ -197,7 +197,7 @@ export default function SpectraVoiceController() {
   ]
 
   return (
-    <div style={{ position: 'fixed', bottom: '24px', left: '24px', zIndex: 999 }}>
+    <div style={{ position: 'fixed', bottom: '24px', left: '24px', zIndex: 999 }} className="voice-floating-container">
       {/* Expanded Voice Command Tray */}
       <AnimatePresence>
         {isOpen && (
@@ -210,7 +210,7 @@ export default function SpectraVoiceController() {
               position: 'absolute',
               bottom: '75px',
               left: 0,
-              width: '340px',
+              width: 'min(calc(100vw - 32px), 340px)',
               background: 'rgba(10, 12, 18, 0.95)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(59, 130, 246, 0.3)',
@@ -385,6 +385,7 @@ export default function SpectraVoiceController() {
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
           whileHover={{ scale: 1.04 }}
+          className="voice-floating-pill"
           style={{
             background: 'rgba(15, 18, 28, 0.85)',
             backdropFilter: 'blur(12px)',
@@ -406,6 +407,18 @@ export default function SpectraVoiceController() {
           {isOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
         </motion.button>
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .voice-floating-container {
+            bottom: 14px !important;
+            left: 12px !important;
+          }
+          .voice-floating-container button {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }

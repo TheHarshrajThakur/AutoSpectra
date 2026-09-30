@@ -333,17 +333,17 @@ export default function SpectraDynoBench() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Left Card: Live Dyno Plot & Telemetry HUD */}
         <div style={{
           background: 'rgba(12, 14, 22, 0.8)',
           backdropFilter: 'blur(16px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '1.5rem',
-          padding: '1.75rem',
+          padding: '1.5rem',
           boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <Gauge size={20} color="#38bdf8" />
               <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff', margin: 0 }}>
@@ -366,8 +366,8 @@ export default function SpectraDynoBench() {
             />
           </div>
 
-          {/* Real-time Telemetry Readouts */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginTop: '1.25rem' }}>
+          {/* Real-time Telemetry Readouts (2x2 on mobile, 4x1 on desktop) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.65rem', marginTop: '1.25rem' }}>
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
               <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Current RPM</div>
               <div style={{ fontSize: '1.4rem', fontWeight: 900, color: isEngineIgnited ? '#fff' : '#64748b', fontFamily: 'monospace' }}>

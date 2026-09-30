@@ -285,19 +285,15 @@ function ModelCard({ comp, onClick, index, t }) {
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="gallery-card"
       style={{
-        borderRadius: '1.25rem', overflow: 'hidden',
-        background: 'rgba(20,20,20,0.6)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        cursor: 'pointer', display: 'flex', flexDirection: 'column',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
         transformStyle: 'preserve-3d',
-        height: '420px',
-        boxShadow: '0 15px 35px -5px rgba(0,0,0,0.6), 0 0 15px rgba(59,130,246,0.05)'
       }}
     >
-      <div id={`viewer-${comp.id}`} style={{ position: 'relative', height: '260px', background: '#000000' }}>
+      <div id={`viewer-${comp.id}`} className="gallery-card-viewer">
         {isHandTracking && useStore.getState().handControlTarget === `comp-${comp.id}` && <HandGestureController />}
         {hasLoaded && (
           <motion.div 
@@ -452,9 +448,9 @@ function ModelCard({ comp, onClick, index, t }) {
 
       {/* Info */}
       <div style={{
-        padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)',
+        padding: '1rem 1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)',
         background: 'transparent',
-        display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1
+        display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
           <div style={{ flex: 1 }}>
@@ -527,11 +523,11 @@ export default function ComponentGallery() {
   }
 
   return (
-    <section id="inventory" style={{ padding: '8rem 5vw', background: '#050505', position: 'relative' }}>
+    <section id="inventory" style={{ padding: 'clamp(3rem, 5vw, 6rem) clamp(1rem, 4vw, 5vw)', background: '#050505', position: 'relative' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* Header Area */}
-        <div style={{ marginBottom: '4rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '2rem' }}>
+        <div style={{ marginBottom: 'clamp(2rem, 3.5vw, 4rem)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
             <div>
               <div className="section-label">
                 <span>{t('gallery.badge')}</span>
@@ -541,7 +537,7 @@ export default function ComponentGallery() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 style={{
-                  fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900,
+                  fontSize: 'clamp(2.2rem, 5vw, 4rem)', fontWeight: 900,
                   color: '#ffffff',
                   fontFamily: "'Outfit', sans-serif", lineHeight: 1.1,
                   letterSpacing: '-0.02em'
@@ -560,9 +556,9 @@ export default function ComponentGallery() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{
-                    padding: '0.85rem 1.5rem', borderRadius: '2rem',
+                    padding: '0.75rem 1.25rem', borderRadius: '2rem',
                     border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)',
-                    width: '100%', maxWidth: '300px', fontSize: '0.9rem', outline: 'none',
+                    width: '100%', maxWidth: '300px', fontSize: '0.85rem', outline: 'none',
                     color: '#fff',
                     boxShadow: '0 4px 10px rgba(0,0,0,0.03)',
                     transition: 'all 0.3s'
@@ -575,20 +571,21 @@ export default function ComponentGallery() {
           </div>
 
           {/* Category Tabs */}
-          <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }} className="no-scrollbar">
             {categories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 style={{
-                  padding: '0.6rem 1.5rem', borderRadius: '2rem',
+                  padding: '0.5rem 1.25rem', borderRadius: '2rem',
                   background: activeCategory === cat.id ? '#3b82f6' : 'rgba(255,255,255,0.05)',
                   color: activeCategory === cat.id ? '#fff' : 'rgba(255,255,255,0.6)',
                   border: '1px solid',
                   borderColor: activeCategory === cat.id ? '#3b82f6' : 'rgba(255,255,255,0.1)',
-                  fontSize: '0.85rem', fontWeight: 700,
+                  fontSize: '0.8rem', fontWeight: 700,
                   cursor: 'pointer', transition: 'all 0.3s',
-                  boxShadow: activeCategory === cat.id ? '0 10px 20px -5px rgba(59,130,246,0.4)' : 'none'
+                  boxShadow: activeCategory === cat.id ? '0 10px 20px -5px rgba(59,130,246,0.4)' : 'none',
+                  flexShrink: 0
                 }}
               >
                 {cat.label}
@@ -598,7 +595,7 @@ export default function ComponentGallery() {
         </div>
 
         {/* Grid Area */}
-        <div style={{ position: 'relative', minHeight: '400px' }}>
+        <div style={{ position: 'relative', minHeight: '300px' }}>
           {filteredComponents.length > 0 ? (
             <motion.div 
               layout
@@ -606,7 +603,7 @@ export default function ComponentGallery() {
                 display: 'flex', 
                 flexWrap: 'wrap', 
                 justifyContent: 'center', 
-                gap: '2.5rem' 
+                gap: 'clamp(1rem, 2.5vw, 2.5rem)' 
               }}
             >
               {filteredComponents.map((comp, i) => (

@@ -34,6 +34,8 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
@@ -316,11 +318,11 @@ html.lenis { height: auto; }
 }
 
 /* ============================================
-   STATS STRIP REFINEMENT (Theme-reactive)
+   STATS STRIP REFINEMENT (Mobile Optimized)
    ============================================ */
 .stats-strip {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -328,14 +330,13 @@ html.lenis { height: auto; }
   overflow: hidden;
   width: 100%;
   max-width: 550px;
-  margin-top: 4rem;
+  margin-top: 2rem;
   box-shadow: 0 20px 40px -10px rgba(0,0,0,0.7), 0 0 20px rgba(var(--color-primary-rgb), 0.1);
 }
 
 .stats-item {
-  flex: 1;
   background: var(--color-surface);
-  padding: 1.5rem 1rem;
+  padding: 0.9rem 0.4rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -345,8 +346,20 @@ html.lenis { height: auto; }
 
 @media (min-width: 640px) {
   .stats-strip {
-    flex-direction: row;
+    margin-top: 3.5rem;
   }
+  .stats-item {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* Horizontal scroll with hidden scrollbar */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* ============================================
@@ -438,5 +451,109 @@ html.lenis { height: auto; }
               border-color 0.5s ease,
               color 0.3s ease,
               box-shadow 0.5s ease;
+}
+
+/* ============================================
+   MOBILE COMPACT LAYOUT UTILITIES
+   ============================================ */
+/* Touch swipeable row for mobile teasers (SpectraLab & Academy) */
+.mobile-snap-row {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1rem;
+  padding: 0.5rem 0.25rem 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-snap-card {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .mobile-snap-row.spectralab-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    overflow-x: visible;
+    padding: 0;
+  }
+  .mobile-snap-row.spectralab-grid .mobile-snap-card {
+    width: auto !important;
+  }
+  .mobile-snap-row.academy-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    overflow-x: visible;
+    padding: 0;
+  }
+  .mobile-snap-row.academy-grid .mobile-snap-card {
+    width: min(100%, 360px) !important;
+    height: 280px !important;
+    padding: 2.5rem !important;
+  }
+}
+
+/* Responsive Component Gallery Card */
+.gallery-card {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transform-style: preserve-3d;
+  height: 330px;
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(59, 130, 246, 0.05);
+}
+
+.gallery-card-viewer {
+  position: relative;
+  height: 190px;
+  background: #000000;
+}
+
+@media (min-width: 640px) {
+  .gallery-card {
+    height: 380px;
+  }
+  .gallery-card-viewer {
+    height: 230px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gallery-card {
+    height: 420px;
+  }
+  .gallery-card-viewer {
+    height: 260px;
+  }
+}
+
+/* Subtle mobile swipe indicator */
+.swipe-hint {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-primary-light, #60a5fa);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+  opacity: 0.85;
+}
+
+@media (min-width: 768px) {
+  .swipe-hint {
+    display: none !important;
+  }
 }
 

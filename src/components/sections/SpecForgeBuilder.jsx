@@ -159,14 +159,14 @@ export default function SpecForgeBuilder() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Left: Parameter Tuning Sliders */}
         <div style={{
           background: 'rgba(12, 15, 24, 0.85)',
           backdropFilter: 'blur(16px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '1.5rem',
-          padding: '2rem',
+          padding: '1.5rem',
           boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
           display: 'flex',
           flexDirection: 'column',

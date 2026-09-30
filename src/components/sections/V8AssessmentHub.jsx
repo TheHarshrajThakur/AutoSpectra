@@ -417,7 +417,7 @@ export default function V8AssessmentHub({ onBackToModules }) {
           {assessmentMode === 'exam' && (
             <div
               style={{
-                padding: '3rem 2.5rem',
+                padding: '2rem 1.25rem',
                 borderRadius: '1.5rem',
                 background: 'rgba(20,20,30,0.8)',
                 border: '1px solid rgba(239,68,68,0.3)',
@@ -431,7 +431,7 @@ export default function V8AssessmentHub({ onBackToModules }) {
                   <Award size={16} /> Standard SAE / ASE Engine Blueprinting Exam Format
                 </div>
 
-                <h2 style={{ fontSize: '2.2rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif", margin: '0 0 1rem 0' }}>
+                <h2 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', fontWeight: 900, fontFamily: "'Outfit', sans-serif", margin: '0 0 1rem 0' }}>
                   Grand Master V8 Engine Builder Examination
                 </h2>
                 <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: '2rem' }}>

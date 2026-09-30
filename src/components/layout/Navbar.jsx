@@ -268,6 +268,29 @@ export default function Navbar() {
                 </motion.button>
               )
             })}
+
+            {/* Mobile Drawer Join CTA Button */}
+            <div style={{ marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  borderRadius: '1rem',
+                  background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+                  color: '#fff',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.9rem',
+                  letterSpacing: '0.06em',
+                  cursor: 'pointer',
+                  boxShadow: '0 8px 20px rgba(59,130,246,0.3)'
+                }}
+              >
+                {t('nav.join', { defaultValue: 'JOIN AUTO SPECTRA' })}
+              </motion.button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

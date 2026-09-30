@@ -32,6 +32,7 @@ export default function SettingsPanel() {
         animate={isSettingsOpen ? { rotate: 180 } : { rotate: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         aria-label="Open Settings"
+        className="settings-floating-btn"
         style={{
           position: 'fixed',
           bottom: '2rem',
@@ -52,6 +53,18 @@ export default function SettingsPanel() {
       >
         <Settings size={22} />
       </motion.button>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .settings-floating-btn {
+            bottom: 14px !important;
+            right: 12px !important;
+            width: 44px !important;
+            height: 44px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+          }
+        }
+      `}</style>
 
       {/* Backdrop */}
       <AnimatePresence>

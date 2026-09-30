@@ -45,83 +45,44 @@ export default function SpectraLabHub({ initialTab = 'dyno' }) {
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#05070c', color: '#fff', paddingTop: '7rem', paddingBottom: '6rem' }}>
+    <div style={{ minHeight: '100vh', background: '#05070c', color: '#fff', paddingTop: '5.5rem', paddingBottom: '6.5rem' }}>
       {/* Top Header & Navigation Bar */}
-      <div style={{ maxWidth: '1240px', margin: '0 auto 1.5rem', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ maxWidth: '1240px', margin: '0 auto 1.5rem', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         
-        {/* Left: Back Link & Lab Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            onClick={() => navigate('/')}
-            style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '100px',
-              padding: '0.5rem 1.1rem',
-              color: '#fff',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = '#3b82f6'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-          >
-            <ChevronLeft size={16} /> 3D Showcase
-          </button>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.1rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em', textTransform: 'uppercase' }}>
-              SpectraLab <span className="text-gradient-blue">Workspace</span>
-            </span>
+        {/* Top Row: Back Link & Title + Master START/END Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '100px',
+                padding: '0.45rem 0.9rem',
+                color: '#fff',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = '#3b82f6'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+            >
+              <ChevronLeft size={15} /> 3D Showcase
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '1.05rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em', textTransform: 'uppercase' }}>
+                SpectraLab <span className="text-gradient-blue">Workspace</span>
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Center: Tab Switcher Pills */}
-        <div style={{
-          display: 'flex',
-          background: 'rgba(15, 18, 28, 0.9)',
-          padding: '0.35rem',
-          borderRadius: '100px',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-          gap: '0.3rem'
-        }}>
-          {tabs.map(tab => {
-            const isSelected = activeTab === tab.id
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  background: isSelected ? 'linear-gradient(135deg, #1d4ed8, #3b82f6)' : 'none',
-                  border: 'none',
-                  borderRadius: '100px',
-                  padding: '0.55rem 1.15rem',
-                  color: isSelected ? '#fff' : 'rgba(255,255,255,0.6)',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  transition: 'all 0.2s ease',
-                  boxShadow: isSelected ? '0 4px 15px rgba(59,130,246,0.4)' : 'none'
-                }}
-              >
-                <Icon size={14} />
-                {tab.label}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Right: Master START & END Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          {/* Right: Master START & END Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {/* START BUTTON */}
           <motion.button
             whileHover={{ scale: 1.04 }}
@@ -186,6 +147,53 @@ export default function SpectraLabHub({ initialTab = 'dyno' }) {
           </motion.button>
         </div>
       </div>
+
+      {/* Row 2: Tab Switcher Pills with horizontal touch scroll */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: 'rgba(15, 18, 28, 0.9)',
+        padding: '0.35rem',
+        borderRadius: '100px',
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+        gap: '0.3rem',
+        overflowX: 'auto',
+        maxWidth: '100%',
+        alignSelf: 'flex-start'
+      }} className="no-scrollbar">
+        {tabs.map(tab => {
+          const isSelected = activeTab === tab.id
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                background: isSelected ? 'linear-gradient(135deg, #1d4ed8, #3b82f6)' : 'none',
+                border: 'none',
+                borderRadius: '100px',
+                padding: '0.5rem 1rem',
+                color: isSelected ? '#fff' : 'rgba(255,255,255,0.6)',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                transition: 'all 0.2s ease',
+                boxShadow: isSelected ? '0 4px 15px rgba(59,130,246,0.4)' : 'none',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <Icon size={14} />
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
 
       {/* Global Status Banner when Lab is Stopped */}
       {!isEngineIgnited && (

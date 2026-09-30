@@ -57,7 +57,7 @@ export default function Hero() {
         minHeight: '100vh', position: 'relative',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: '#000', overflow: 'hidden',
-        padding: '8rem 5vw 4rem',
+        padding: 'clamp(4.5rem, 6vw, 8rem) clamp(1.25rem, 4vw, 5vw) clamp(2rem, 4vw, 4rem)',
       }}
     >
       {/* Grid Background */}
@@ -73,7 +73,7 @@ export default function Hero() {
 
       {/* Main Content Grid */}
       <div 
-        className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-20 items-center w-full max-w-[1200px] relative z-10"
+        className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 lg:gap-20 items-center w-full max-w-[1200px] relative z-10"
       >
         
         {/* Left Column: Text */}
@@ -91,10 +91,10 @@ export default function Hero() {
 
           {/* Headline */}
           <motion.h1 variants={item} style={{
-            fontSize: 'clamp(2.5rem, 5vw, 5rem)',
+            fontSize: 'clamp(2.2rem, 5vw, 5rem)',
             fontWeight: 800, lineHeight: 0.95,
             letterSpacing: '-0.02em',
-            marginBottom: '1.5rem', fontFamily: "'Outfit', sans-serif"
+            marginBottom: '1.25rem', fontFamily: "'Outfit', sans-serif"
           }}>
             <span className="text-icy" style={{ display: 'block' }}>{t('hero.title_part1')}</span>
             <span className="text-icy" style={{ display: 'block' }}>{t('hero.title_part2')}</span>
@@ -102,22 +102,22 @@ export default function Hero() {
 
           {/* Subtext */}
           <motion.p variants={item} style={{
-            fontSize: 'clamp(1rem, 1.5vw, 1.15rem)',
+            fontSize: 'clamp(0.95rem, 1.4vw, 1.15rem)',
             color: '#94a3b8',
-            fontWeight: 400, lineHeight: 1.7,
-            maxWidth: '500px', marginBottom: '2.5rem'
+            fontWeight: 400, lineHeight: 1.6,
+            maxWidth: '500px', marginBottom: '1.75rem'
           }}>
             {t('hero.subtext')}
           </motion.p>
 
           {/* CTAs */}
-          <motion.div variants={item} className="mobile-center" style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+          <motion.div variants={item} className="mobile-center" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
             <motion.a
               href="#showcase"
               className="btn-primary"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '0.85rem 1.75rem' }}
             >
               {t('hero.cta_forge')}
               <ArrowRight size={16} />
@@ -127,7 +127,7 @@ export default function Hero() {
               className="btn-ghost"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '0.85rem 1.75rem' }}
             >
               {t('hero.cta_catalog')}
             </motion.a>
@@ -160,7 +160,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="h-[400px] lg:h-[700px] w-full relative"
+          className="h-[250px] sm:h-[360px] lg:h-[700px] w-full relative"
         >
           {/* Decorative Background Glow for 3D area */}
           <div style={{

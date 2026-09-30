@@ -383,30 +383,30 @@ export default function ModelViewer() {
 
       <section
         id="showcase"
-        style={{ padding: '4rem 1.5rem', background: '#050505', position: 'relative' }}
+        style={{ padding: 'clamp(2.5rem, 5vw, 4rem) clamp(1rem, 3vw, 1.5rem)', background: '#050505', position: 'relative' }}
       >
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
 
         {/* Section Header */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
           <div className="section-label">
             <span>{t('viewer.badge')}</span>
           </div>
         </div>
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
           <h2 style={{
-            fontSize: '2rem', fontWeight: 700, color: '#ffffff',
-            fontFamily: "'Inter', sans-serif", marginBottom: '0.5rem'
+            fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 700, color: '#ffffff',
+            fontFamily: "'Inter', sans-serif", marginBottom: '0.4rem'
           }}>
             {t('viewer.title')}
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem' }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'clamp(0.85rem, 1.5vw, 1rem)' }}>
             {t('viewer.subtitle')}
           </p>
         </div>
 
         {/* Engine Model Switcher Bar */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.25rem', width: '100%', overflowX: 'auto', padding: '0 0.25rem' }} className="no-scrollbar">
           <div style={{
             display: 'inline-flex',
             padding: '4px',
@@ -415,7 +415,8 @@ export default function ModelViewer() {
             borderRadius: '14px',
             border: '1px solid rgba(255, 255, 255, 0.08)',
             gap: '6px',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.5)'
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+            flexShrink: 0
           }}>
             <button
               onClick={() => setSource('native')}
@@ -433,7 +434,9 @@ export default function ModelViewer() {
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: source === 'native' ? '0 0 15px rgba(59,130,246,0.25)' : 'none'
+                boxShadow: source === 'native' ? '0 0 15px rgba(59,130,246,0.25)' : 'none',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
               }}
             >
               <Zap size={15} color={source === 'native' ? '#60a5fa' : '#64748b'} />
@@ -455,7 +458,9 @@ export default function ModelViewer() {
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: source === 'animated' ? '0 0 15px rgba(6,182,212,0.25)' : 'none'
+                boxShadow: source === 'animated' ? '0 0 15px rgba(6,182,212,0.25)' : 'none',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
               }}
             >
               <Activity size={15} color={source === 'animated' ? '#06b6d4' : '#64748b'} />
@@ -477,7 +482,9 @@ export default function ModelViewer() {
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: source === 'reference' ? '0 0 15px rgba(56,189,248,0.25)' : 'none'
+                boxShadow: source === 'reference' ? '0 0 15px rgba(56,189,248,0.25)' : 'none',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
               }}
             >
               <Sparkles size={15} color={source === 'reference' ? '#38bdf8' : '#64748b'} />
@@ -492,7 +499,7 @@ export default function ModelViewer() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="h-[500px] sm:h-[550px] lg:h-[650px] w-full"
+          className="h-[360px] sm:h-[480px] lg:h-[650px] w-full"
           style={{
             position: 'relative',
             background: '#09090b',

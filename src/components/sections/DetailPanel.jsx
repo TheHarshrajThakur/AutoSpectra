@@ -220,7 +220,7 @@ Timestamp: ${new Date().toLocaleString()}
               transition={{ duration: 0.5 }}
               style={{
                 position: 'relative',
-                height: '70vh', minHeight: '500px',
+                height: 'min(65vh, 600px)', minHeight: '360px',
                 background: '#0a0a0a', borderRadius: '1.5rem',
                 border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5), 0 0 20px rgba(59,130,246,0.05)'

@@ -211,17 +211,17 @@ export default function SpectraDiagnosticLab() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Left: Live FFT Spectrum & Telemetry Scanner */}
         <div style={{
           background: 'rgba(12, 15, 24, 0.85)',
           backdropFilter: 'blur(16px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '1.5rem',
-          padding: '1.75rem',
+          padding: '1.5rem',
           boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <Activity size={20} color={activeFault !== 'none' ? '#ef4444' : '#10b981'} />
               <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff', margin: 0 }}>
@@ -258,8 +258,8 @@ export default function SpectraDiagnosticLab() {
             </div>
           </div>
 
-          {/* Live OBD-II Telemetry Gauges */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginTop: '1.25rem' }}>
+          {/* Live OBD-II Telemetry Gauges (2x2 on mobile, 4x1 on desktop) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.65rem', marginTop: '1.25rem' }}>
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
               <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Oil Pressure</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 900, color: activeFault === 'rod_knock' ? '#ef4444' : '#fff', fontFamily: 'monospace' }}>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Code2 } from 'lucide-react'
+import { ExternalLink, Code2, ArrowUpRight } from 'lucide-react'
 
 // Official GitHub vector mark
 function GithubIcon({ size = 18, className = '', style = {} }) {
@@ -63,7 +63,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        padding: '5rem 1.5rem 6rem',
+        padding: 'clamp(3rem, 5vw, 5rem) clamp(1rem, 3vw, 1.5rem) clamp(4.5rem, 6vw, 6rem)',
         borderTop: '1px solid rgba(255,255,255,0.06)',
         background: 'linear-gradient(180deg, var(--color-surface, #050505) 0%, rgba(8, 10, 15, 0.98) 100%)',
         position: 'relative',
@@ -86,7 +86,7 @@ export default function Footer() {
       />
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-14 mb-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-14 mb-10 lg:mb-14">
           {/* Branding & Developers Column */}
           <div className="col-span-1 sm:col-span-2 mobile-center">
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.25rem' }}>
@@ -113,13 +113,16 @@ export default function Footer() {
             {/* Developer Credits Card */}
             <div
               style={{
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '1.25rem',
-                padding: '1.25rem',
+                width: '100%',
                 maxWidth: '440px',
-                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.35)',
-                backdropFilter: 'blur(10px)'
+                margin: '0 auto',
+                background: 'rgba(15, 18, 28, 0.85)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '1.25rem',
+                padding: '1.2rem',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.45)',
+                backdropFilter: 'blur(12px)',
+                textAlign: 'left'
               }}
             >
               <div
@@ -127,89 +130,110 @@ export default function Footer() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.45rem',
-                  fontSize: '0.72rem',
+                  fontSize: '0.74rem',
                   fontWeight: 800,
                   textTransform: 'uppercase',
                   letterSpacing: '0.12em',
                   color: 'var(--color-primary-light, #60a5fa)',
-                  marginBottom: '0.9rem'
+                  marginBottom: '0.85rem'
                 }}
               >
-                <Code2 size={14} />
+                <Code2 size={15} />
                 <span>{designedByText}</span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
                 {DEVELOPERS.map((dev) => (
                   <motion.a
                     key={dev.handle}
                     href={dev.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ x: 4 }}
+                    whileHover={{ y: -2, scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
                     style={{
+                      width: '100%',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '0.75rem',
-                      background: 'rgba(255, 255, 255, 0.03)',
+                      flexDirection: 'column',
+                      padding: '0.85rem 1rem',
+                      borderRadius: '0.85rem',
+                      background: 'rgba(255, 255, 255, 0.035)',
                       border: '1px solid rgba(255, 255, 255, 0.08)',
                       textDecoration: 'none',
                       color: '#fff',
+                      gap: '0.35rem',
                       transition: 'all 0.25s ease'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.45)'
-                      e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)'
+                      e.currentTarget.style.borderColor = 'var(--color-primary-light, #60a5fa)'
+                      e.currentTarget.style.background = 'rgba(var(--color-primary-rgb), 0.1)'
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.035)'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                        <div
+                          style={{
+                            width: '30px',
+                            height: '30px',
+                            borderRadius: '8px',
+                            background: 'rgba(255, 255, 255, 0.06)',
+                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            flexShrink: 0
+                          }}
+                        >
+                          <GithubIcon size={16} />
+                        </div>
+                        <span style={{
+                          fontSize: '0.92rem',
+                          fontWeight: 700,
+                          color: '#ffffff',
+                          letterSpacing: '-0.01em',
+                          lineHeight: 1.25
+                        }}>
+                          {dev.name}
+                        </span>
+                      </div>
+
                       <div
                         style={{
-                          width: '30px',
-                          height: '30px',
-                          borderRadius: '50%',
-                          background: 'rgba(255, 255, 255, 0.06)',
-                          border: '1px solid rgba(255, 255, 255, 0.12)',
-                          display: 'flex',
+                          display: 'inline-flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
+                          gap: '0.3rem',
+                          padding: '0.3rem 0.6rem',
+                          borderRadius: '0.5rem',
+                          background: 'rgba(var(--color-primary-rgb), 0.12)',
+                          border: '1px solid rgba(var(--color-primary-rgb), 0.3)',
+                          color: 'var(--color-primary-light, #60a5fa)',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
                           flexShrink: 0
                         }}
                       >
-                        <GithubIcon size={16} />
-                      </div>
-                      <div style={{ textAlign: 'left' }}>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.2 }}>
-                          {dev.name}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.45)', fontFamily: 'monospace', marginTop: '2px' }}>
-                          github.com/{dev.handle}
-                        </div>
+                        <span>GitHub</span>
+                        <ArrowUpRight size={13} />
                       </div>
                     </div>
 
                     <div
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        color: 'var(--color-primary-light, #60a5fa)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em'
+                        fontSize: '0.78rem',
+                        color: 'rgba(255, 255, 255, 0.55)',
+                        fontWeight: 500,
+                        paddingLeft: '2.5rem',
+                        letterSpacing: '0.01em'
                       }}
                     >
-                      <span>GitHub</span>
-                      <ExternalLink size={12} />
+                      github.com/{dev.handle}
                     </div>
                   </motion.a>
                 ))}
