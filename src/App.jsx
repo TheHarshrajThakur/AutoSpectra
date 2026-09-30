@@ -6,6 +6,7 @@ import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import Lenis from 'lenis'
 import Navbar from './components/layout/Navbar'
+import Footer from './components/layout/Footer'
 import Hero from './components/sections/Hero'
 import ModelViewer from './components/sections/ModelViewer'
 import ComponentGallery from './components/sections/ComponentGallery'
@@ -415,21 +416,6 @@ export default function App() {
 
   const containerRef = useRef(null)
 
-  const platformLinks = [
-    { label: t('footer.link_forge'), href: '#360' },
-    { label: t('footer.link_library'), href: '#inventory' },
-    { label: t('footer.link_academy'), href: '/academy' },
-    { label: 'V8 Builder Assessment', href: '/assessment' },
-    { label: t('footer.link_schematics'), href: '#inventory' }
-  ]
-
-  const resourceLinks = [
-    { label: t('footer.link_docs'), href: '#' },
-    { label: t('footer.link_community'), href: '#' },
-    { label: t('footer.link_status'), href: '#' },
-    { label: t('footer.link_changelog'), href: '#' }
-  ]
-
   return (
     <div ref={containerRef} style={{ background: 'var(--color-surface, #050505)', color: 'var(--color-text, #fff)', minHeight: '100vh', position: 'relative' }}>
       <ThemeProvider />
@@ -463,59 +449,7 @@ export default function App() {
       </main>
 
       {/* Footer - Only shown on Home page */}
-      {location.pathname === '/' && (
-        <footer style={{
-          padding: '6rem 1.5rem 3rem', borderTop: '1px solid rgba(255,255,255,0.05)',
-          background: 'var(--color-surface, #050505)', position: 'relative'
-        }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-16">
-              {/* Branding Column */}
-              <div className="col-span-1 sm:col-span-2 mobile-center">
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', height: '2.8rem' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, textTransform: 'uppercase', fontFamily: "'Outfit', sans-serif" }}>
-                    <span className="text-icy">Auto Spectra</span>
-                  </div>
-                </div>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', lineHeight: 1.7, maxWidth: '400px' }}>
-                  {t('footer.desc')}
-                </p>
-              </div>
-
-              {/* Quick Links */}
-              <div className="mobile-center">
-                <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('footer.platform_title')}</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {platformLinks.map(link => (
-                    <li key={link.label}><a href={link.href} style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>{link.label}</a></li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Resources */}
-              <div className="mobile-center">
-                <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('footer.resources_title')}</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {resourceLinks.map(link => (
-                    <li key={link.label}><a href={link.href} style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>{link.label}</a></li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="mobile-center" style={{ paddingTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', fontWeight: 500 }}>
-                {t('footer.copyright')}
-              </span>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </footer>
-      )}
+      {location.pathname === '/' && <Footer />}
     </div>
   )
 }
